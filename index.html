@@ -1,0 +1,2417 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Turnos Vigilantes</title>
+<style>
+* { margin:0; padding:0; box-sizing:border-box; }
+
+body {
+  font-family: 'Segoe UI', system-ui, sans-serif;
+  background: #0b1120;
+  color: #e2e8f0;
+  min-height: 100vh;
+  padding: 16px;
+}
+
+/* HEADER */
+header {
+  text-align: center;
+  margin-bottom: 20px;
+}
+header h1 {
+  font-size: 1rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: #7dd3fc;
+  margin-bottom: 2px;
+}
+header p { font-size: 0.72rem; color: #475569; letter-spacing: 0.08em; text-transform: uppercase; }
+
+/* NAV MES */
+.month-nav {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+  margin-bottom: 20px;
+}
+.month-nav button {
+  background: #1e293b;
+  border: 1.5px solid #334155;
+  color: #94a3b8;
+  width: 36px; height: 36px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 1.1rem;
+  display: flex; align-items: center; justify-content: center;
+  transition: all 0.15s;
+}
+.month-nav button:hover { border-color: #60a5fa; color: #bfdbfe; }
+.month-nav h2 { font-size: 1.05rem; font-weight: 700; color: #e2e8f0; min-width: 180px; text-align: center; }
+
+/* TABS TRABAJADOR */
+.tabs {
+  display: flex;
+  gap: 8px;
+  justify-content: center;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+}
+.tab-btn {
+  background: #1e293b;
+  border: 1.5px solid #334155;
+  color: #64748b;
+  padding: 9px 18px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 0.8rem;
+  font-weight: 600;
+  transition: all 0.15s;
+}
+.tab-btn:hover { border-color: #60a5fa; color: #bfdbfe; }
+.tab-btn.active { background: #1d4ed8; border-color: #3b82f6; color: #fff; }
+.tab-btn.all { background: #164e63; border-color: #0891b2; color: #7dd3fc; }
+.tab-btn.all.active { background: #0e7490; border-color: #06b6d4; color: #fff; }
+
+/* LOGIN — estilo Netflix: selector de perfiles */
+.login-screen {
+  position: fixed; inset: 0; background: #0b1120;
+  display: flex; align-items: center; justify-content: center;
+  padding: 20px; z-index: 50;
+}
+.login-card {
+  background: transparent; border: none; border-radius: 0;
+  padding: 28px 22px; max-width: 480px; width: 100%; text-align: center;
+}
+.login-title {
+  font-size: 1.3rem; font-weight: 700; letter-spacing: 0.04em;
+  text-transform: uppercase; color: #f1f5f9; margin-bottom: 8px;
+}
+.login-sub { font-size: 0.8rem; color: #94a3b8; margin-bottom: 34px; }
+.login-options {
+  display: flex; flex-wrap: wrap; flex-direction: row;
+  align-items: flex-start; justify-content: center; gap: 22px;
+}
+.login-btn {
+  background: transparent; border: none; color: #94a3b8;
+  padding: 0; cursor: pointer; transition: all 0.15s;
+  display: flex; flex-direction: column; align-items: center; gap: 10px;
+  width: 96px;
+}
+.login-btn .profile-avatar {
+  width: 88px; height: 88px; border-radius: 12px;
+  background: #334155; border: 2.5px solid transparent;
+  display: flex; align-items: center; justify-content: center;
+  transition: all 0.15s;
+}
+.login-btn .profile-avatar svg { width: 52px; height: 52px; fill: #cbd5e1; }
+.login-btn .profile-name {
+  font-size: 0.85rem; font-weight: 600; color: #94a3b8; transition: color 0.15s;
+}
+.login-btn .profile-subnote {
+  font-size: 0.62rem; color: #64748b; margin-top: -6px; transition: color 0.15s;
+}
+.login-btn:hover .profile-avatar, .login-btn:focus .profile-avatar {
+  border-color: #f1f5f9; transform: scale(1.06);
+}
+.login-btn:hover .profile-name, .login-btn:focus .profile-name { color: #f1f5f9; }
+.login-btn.all .profile-avatar { background: #0e3a4a; }
+.login-btn.all .profile-avatar svg { fill: #7dd3fc; }
+.login-btn.all:hover .profile-avatar { border-color: #7dd3fc; }
+.login-btn.all:hover .profile-name { color: #7dd3fc; }
+.login-btn.temp .profile-avatar { background: #053b36; }
+.login-btn.temp .profile-avatar svg { fill: #2dd4bf; }
+.login-btn.temp:hover .profile-avatar { border-color: #2dd4bf; }
+.login-btn.temp:hover .profile-name { color: #2dd4bf; }
+.login-btn.temp:hover .profile-subnote { color: #5eead4; }
+.logout-link {
+  background: none; border: none; color: #475569; font-size: 0.7rem;
+  cursor: pointer; text-decoration: underline; letter-spacing: 0.04em;
+  display: block; margin: 0 auto 18px;
+}
+.logout-link:hover { color: #94a3b8; }
+
+/* RESUMEN MES */
+.month-summary {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+  margin-bottom: 20px;
+}
+.summary-card {
+  background: #1e293b;
+  border: 1px solid #334155;
+  border-radius: 10px;
+  padding: 12px;
+  text-align: center;
+}
+.summary-card .s-name { font-size: 0.65rem; color: #64748b; text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 4px; }
+.summary-card .s-hours { font-size: 1.4rem; font-weight: 800; color: #7dd3fc; line-height: 1; }
+.summary-card .s-label { font-size: 0.6rem; color: #475569; margin-top: 2px; }
+.summary-card.v01 .s-hours { color: #60a5fa; }
+.summary-card.v02 .s-hours { color: #a78bfa; }
+.summary-card.v03 .s-hours { color: #34d399; }
+
+/* SEMANAS */
+.week-block { margin-bottom: 18px; }
+.week-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+  padding: 0 2px;
+}
+.week-label { font-size: 0.65rem; letter-spacing: 0.1em; text-transform: uppercase; color: #475569; font-weight: 600; }
+.week-hours { font-size: 0.7rem; color: #64748b; }
+.week-hours span { font-weight: 700; }
+.week-hours .h01 { color: #60a5fa; }
+.week-hours .h02 { color: #a78bfa; }
+.week-hours .h03 { color: #34d399; }
+
+/* GRID DIAS */
+.days-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 5px;
+}
+
+/* CARD DIA - modo individual */
+.day-card {
+  border-radius: 9px;
+  padding: 9px 4px;
+  text-align: center;
+  border: 1.5px solid transparent;
+  position: relative;
+  min-height: 78px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 3px;
+}
+.day-card.empty { background: transparent; border-color: transparent; }
+.day-card.free { background: #102417; border-color: #16653f; }
+.day-card.shift-day { background: #3a2308; border-color: #f97316; }
+.day-card.shift-night { background: #142243; border-color: #3b82f6; }
+.day-card.holiday-free { background: #1a2a1a; border-color: #166534; }
+.day-card.motivo-incapacidad { background: #3b0a24; border-color: #db2777; }
+.day-card.motivo-vacaciones { background: #102417; border-color: #16653f; }
+.day-card.motivo-permiso { background: #042f2c; border-color: #0d9488; }
+.day-card.today { box-shadow: 0 0 0 2px #facc15; }
+
+.day-name { font-size: 0.6rem; letter-spacing: 0.06em; text-transform: uppercase; color: #475569; }
+.day-num { font-size: 1.15rem; font-weight: 700; color: #e2e8f0; line-height: 1; }
+.day-card.free .day-num { color: #4ade80; }
+.day-card.holiday-free .day-num { color: #4ade80; }
+.day-card.motivo-incapacidad .day-num { color: #f472b6; }
+.day-card.motivo-vacaciones .day-num { color: #4ade80; }
+.day-card.motivo-permiso .day-num { color: #2dd4bf; }
+
+.shift-badge {
+  font-size: 0.58rem; font-weight: 700; padding: 2px 5px;
+  border-radius: 3px; display: inline-block; letter-spacing: 0.03em;
+}
+.day-card.shift-day .shift-badge { background: #7c2d12; color: #fed7aa; }
+.day-card.shift-night .shift-badge { background: #1e3a8a; color: #bfdbfe; }
+.day-card.free .shift-badge { background: #14532d; color: #4ade80; }
+.day-card.holiday-free .shift-badge { background: #14532d; color: #4ade80; }
+.day-card.motivo-incapacidad .shift-badge { background: #831843; color: #fbcfe8; }
+.day-card.motivo-vacaciones .shift-badge { background: #14532d; color: #4ade80; }
+.day-card.motivo-permiso .shift-badge { background: #134e4a; color: #5eead4; }
+
+.today-tag {
+  position: absolute; top: -7px; left: 50%; transform: translateX(-50%);
+  background: #facc15; color: #0f172a; font-size: 0.5rem;
+  font-weight: 800; padding: 1px 4px; border-radius: 3px;
+  letter-spacing: 0.04em; white-space: nowrap;
+}
+.holiday-tag {
+  font-size: 0.52rem; color: #4ade80; text-align: center;
+  line-height: 1.2; max-width: 100%; word-break: break-word;
+  padding: 0 2px;
+}
+.sub-tag {
+  font-size: 0.52rem; color: #fbbf24; text-align: center;
+  line-height: 1.2; max-width: 100%; word-break: break-word;
+  padding: 0 2px; font-weight: 700;
+}
+.ajuste-tag {
+  font-size: 0.52rem; color: #fca5a5; text-align: center;
+  line-height: 1.2; max-width: 100%; word-break: break-word;
+  padding: 0 2px; font-weight: 700;
+}
+
+/* MODO TODOS */
+.day-card-all {
+  border-radius: 9px;
+  padding: 7px 4px;
+  text-align: center;
+  border: 1.5px solid #1e293b;
+  background: #111827;
+  position: relative;
+  min-height: 100px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+}
+.day-card-all.empty { background: transparent; border-color: transparent; }
+.day-card-all.today { box-shadow: 0 0 0 2px #facc15; }
+.day-card-all .day-name { font-size: 0.6rem; color: #475569; text-transform: uppercase; letter-spacing: 0.05em; }
+.day-card-all .day-num { font-size: 1rem; font-weight: 700; color: #e2e8f0; line-height: 1; margin-bottom: 3px; }
+.day-card-all.holiday-day .day-num { color: #4ade80; }
+.mini-shift {
+  font-size: 0.58rem; font-weight: 700; padding: 2px 5px;
+  border-radius: 3px; width: 90%; text-align: center;
+  margin: 1px 0;
+}
+.mini-shift.shift-day { background: #7c2d12; color: #fed7aa; }
+.mini-shift.shift-night { background: #1e3a8a; color: #bfdbfe; }
+.mini-shift.rest { background: #14532d; color: #4ade80; }
+.mini-shift.refuerzo { border: 1px dashed #fbbf24; }
+.mini-shift.motivo-incapacidad { background: #831843; color: #fbcfe8; }
+.mini-shift.motivo-vacaciones { background: #14532d; color: #4ade80; }
+.mini-shift.motivo-permiso { background: #134e4a; color: #5eead4; }
+.mini-name { font-size: 0.5rem; color: #64748b; }
+
+/* VISTA DEL DÍA — pantalla completa */
+.view-day-screen {
+  position: fixed; inset: 0; z-index: 20;
+  background: #0b1120;
+  display: flex; flex-direction: column;
+  padding: 14px 16px 18px;
+}
+.day-screen-topbar { display: flex; justify-content: flex-start; margin-bottom: 4px; }
+.back-link {
+  background: none; border: none; color: #475569; font-size: 0.72rem;
+  cursor: pointer; letter-spacing: 0.04em; padding: 6px 0;
+}
+.back-link:hover { color: #94a3b8; }
+.day-view-row {
+  display: flex; align-items: center; justify-content: center;
+  flex: 1; min-height: 0;
+}
+.day-nav-btn {
+  background: #1e293b; border: 1.5px solid #334155; color: #94a3b8;
+  width: 40px; height: 40px; border-radius: 50%; cursor: pointer;
+  font-size: 1.3rem; display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0; transition: all 0.15s;
+}
+.day-nav-btn:hover { border-color: #60a5fa; color: #bfdbfe; }
+.day-nav-btn:disabled { opacity: 0.3; cursor: not-allowed; }
+.day-view-card {
+  position: relative;
+  background: #1e293b; border: 1.5px solid #334155; border-radius: 26px;
+  padding: 26px 18px 26px 16px; text-align: center; width: 100%; max-width: 440px;
+  height: 100%; max-height: 680px;
+  display: flex; flex-direction: row; align-items: stretch; justify-content: center; gap: 8px;
+  touch-action: pan-x; user-select: none; transition: border-color 0.2s, transform 0.18s ease, opacity 0.18s ease;
+}
+.day-view-main {
+  flex: 1; min-width: 0;
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+}
+.day-view-side {
+  width: 86px; flex-shrink: 0;
+  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 14px;
+}
+.day-view-side-left {
+  width: 38px; flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center;
+}
+.side-bar-label {
+  font-size: 0.55rem; color: #64748b; text-transform: uppercase;
+  letter-spacing: 0.06em; font-weight: 700; white-space: nowrap;
+  writing-mode: vertical-rl; transform: rotate(180deg);
+}
+.day-view-icon { margin-bottom: 4px; line-height: 0; }
+.day-view-icon svg { width: 96px; height: 96px; }
+.day-view-card.free { border-color: #16653f; background: #102417; }
+.day-view-card.shift-day { border-color: #f97316; background: #3a2308; }
+.day-view-card.shift-night { border-color: #3b82f6; background: #142243; }
+.day-view-card.motivo-incapacidad { border-color: #db2777; background: #3b0a24; }
+.day-view-card.motivo-vacaciones { border-color: #16653f; background: #102417; }
+.day-view-card.motivo-permiso { border-color: #0d9488; background: #042f2c; }
+.day-view-card.slide-out-up { transform: translateY(-50px); opacity: 0; }
+.day-view-card.slide-out-down { transform: translateY(50px); opacity: 0; }
+.day-view-card.slide-in-up { animation: slideInUp 0.22s ease; }
+.day-view-card.slide-in-down { animation: slideInDown 0.22s ease; }
+@keyframes slideInUp { from { transform: translateY(50px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+@keyframes slideInDown { from { transform: translateY(-50px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+.day-view-date { font-size: 0.85rem; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 10px; }
+.today-pill {
+  display: inline-block; background: #facc15; color: #0f172a; font-size: 0.65rem;
+  font-weight: 800; padding: 3px 10px; border-radius: 10px; margin-bottom: 12px; letter-spacing: 0.05em;
+}
+.day-view-badge { font-size: 2.1rem; font-weight: 800; color: #e2e8f0; margin: 10px 0 6px; letter-spacing: 0.03em; }
+.day-view-time { font-size: 1rem; color: #94a3b8; margin-bottom: 8px; }
+.day-view-hours { font-size: 0.9rem; color: #7dd3fc; font-weight: 700; }
+.day-view-sub { font-size: 0.78rem; color: #fbbf24; font-weight: 700; margin-top: 12px; }
+.day-view-ajuste { font-size: 0.78rem; color: #fca5a5; font-weight: 700; margin-top: 12px; }
+.day-view-holiday { font-size: 0.78rem; color: #4ade80; margin-top: 10px; }
+
+/* LÍNEA DE TIEMPO DINÁMICA (gráfica horizontal, media hora en media hora) */
+.day-status-pill {
+  margin-top: 10px; font-size: 0.72rem; font-weight: 700;
+  padding: 5px 12px; border-radius: 8px; display: inline-block;
+}
+.day-status-pill.working { background: #7f1d1d; color: #fecaca; }
+.day-status-pill.free { background: #14532d; color: #4ade80; }
+
+/* Barra de progreso del turno (horizontal, esquina superior izquierda de la tarjeta) */
+.day-progress-wrap {
+  position: absolute; top: 14px; left: 16px;
+  display: flex; flex-direction: column; align-items: flex-start; gap: 3px; flex-shrink: 0; z-index: 2;
+}
+.day-progress-bar { position: relative; width: 64px; height: 8px; background: #1e293b; border-radius: 4px; overflow: hidden; }
+.day-progress-fill { position: absolute; bottom: 0; left: 0; height: 100%; border-radius: 4px; background: linear-gradient(90deg,#fbbf24,#f97316); transition: width 0.6s ease; }
+.day-progress-text { font-size: 0.62rem; color: #94a3b8; font-weight: 700; }
+
+/* Gráfica vertical de 24h (lado derecho de la tarjeta) */
+.day-timeline-wrap { flex: 1; min-height: 0; width: 100%; display: flex; align-items: center; justify-content: center; }
+.day-timeline-h { position: relative; width: 14px; height: 100%; max-height: 430px; }
+.day-timeline-track {
+  position: relative; width: 100%; height: 100%; border-radius: 6px;
+  overflow: hidden; background: #0f172a; border: 1px solid #334155;
+  box-shadow: inset 0 1px 3px rgba(0,0,0,0.4);
+}
+.tl-seg { position: absolute; left: 0; right: 0; }
+.tl-seg.free { background: linear-gradient(180deg,#22c55e,#14532d); }
+.tl-seg.shift-day { background: linear-gradient(180deg,#fb923c,#7c2d12); }
+.tl-seg.shift-night { background: linear-gradient(180deg,#60a5fa,#1e3a8a); }
+/* marca cada 30 min (sin caer en hora exacta) */
+.tl-tick-minor { position: absolute; left: 3px; right: 3px; height: 1px; background: rgba(255,255,255,0.3); }
+/* marca cada hora exacta */
+.tl-tick-hour { position: absolute; left: 0; right: 0; height: 1px; background: rgba(255,255,255,0.5); }
+/* marca cada 3 horas, con etiqueta a la izquierda */
+.tl-tick-major { position: absolute; left: -4px; right: -4px; height: 1.5px; background: #f8fafc; }
+.tl-label {
+  position: absolute; right: 100%; margin-right: 5px; transform: translateY(-50%);
+  font-size: 0.58rem; font-weight: 800; color: #e2e8f0; white-space: nowrap;
+  text-shadow: 0 1px 2px rgba(0,0,0,0.8);
+}
+/* Flecha flotante que señala la hora actual, baja por la línea de tiempo */
+.tl-now-arrow {
+  position: absolute; left: 100%; margin-left: 4px; transform: translateY(-50%);
+}
+.tl-now-float {
+  display: flex; align-items: center; gap: 3px;
+  animation: tlFloat 1.5s ease-in-out infinite;
+}
+.tl-now-float .arrow-head {
+  width: 0; height: 0;
+  border-top: 5px solid transparent; border-bottom: 5px solid transparent;
+  border-right: 8px solid #facc15;
+  filter: drop-shadow(0 0 4px #facc15);
+}
+.tl-now-time {
+  background: #facc15; color: #0f172a; font-size: 0.56rem; font-weight: 800;
+  padding: 1px 5px; border-radius: 6px; white-space: nowrap;
+}
+@keyframes tlFloat {
+  0%,100% { transform: translateY(0); }
+  50% { transform: translateY(-4px); }
+}
+.day-view-actions { display: flex; justify-content: center; margin-bottom: 4px; }
+.swipe-hint { text-align: center; font-size: 0.68rem; color: #475569; margin: 8px 0 12px; letter-spacing: 0.04em; }
+.month-view-btn {
+  background: #1d4ed8; border: 1.5px solid #3b82f6; color: #fff;
+  padding: 10px 20px; border-radius: 10px; font-size: 0.8rem; font-weight: 700;
+  cursor: pointer; transition: all 0.15s;
+}
+.month-view-btn:hover { background: #1e40af; }
+
+/* LEYENDA */
+.legend {
+  display: flex; gap: 12px; justify-content: center;
+  margin-bottom: 18px; flex-wrap: wrap;
+}
+.legend-item { display: flex; align-items: center; gap: 6px; font-size: 0.72rem; color: #64748b; }
+.dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
+.dot.shift-day { background: #f97316; }
+.dot.shift-night { background: #3b82f6; }
+.dot.rest { background: #22c55e; }
+
+footer {
+  margin-top: 22px; padding: 12px; background: #1e293b;
+  border-radius: 10px; border: 1px solid #334155;
+  font-size: 0.7rem; color: #475569; line-height: 1.5;
+}
+footer strong { color: #64748b; }
+
+@media (max-width: 480px) {
+  .month-summary { grid-template-columns: repeat(3,1fr); gap:6px; }
+  .summary-card .s-hours { font-size: 1.1rem; }
+  .day-view-card { max-width: 100%; border-radius: 20px; }
+  .day-view-side { width: 76px; }
+  .day-view-side-left { width: 32px; }
+  .tl-label { font-size: 0.52rem; margin-right: 4px; }
+  .tl-now-time { font-size: 0.52rem; padding: 1px 4px; }
+}
+
+/* PANEL DE ADMINISTRACIÓN */
+.admin-overlay {
+  position: fixed; inset: 0; background: rgba(0,0,0,0.6);
+  display: flex; align-items: flex-start; justify-content: center;
+  padding: 16px; z-index: 100; overflow-y: auto;
+}
+.admin-modal {
+  background: #1e293b; border: 1.5px solid #334155; border-radius: 16px;
+  padding: 20px 18px 24px; max-width: 460px; width: 100%; margin-top: 24px;
+}
+.admin-modal-header {
+  display: flex; align-items: center; justify-content: space-between;
+  margin-bottom: 4px;
+}
+.admin-modal-title { font-size: 0.95rem; font-weight: 700; color: #7dd3fc; letter-spacing: 0.04em; text-transform: uppercase; }
+.admin-modal-close {
+  background: none; border: none; color: #94a3b8; font-size: 1.3rem;
+  cursor: pointer; line-height: 1; padding: 4px;
+}
+.admin-modal-close:hover { color: #e2e8f0; }
+.admin-section { margin-top: 18px; padding-top: 16px; border-top: 1px solid #334155; }
+.admin-section:first-of-type { margin-top: 14px; }
+.admin-section-title { font-size: 0.78rem; font-weight: 700; color: #cbd5e1; margin-bottom: 10px; text-transform: uppercase; letter-spacing: 0.04em; }
+.admin-field { margin-bottom: 10px; }
+.admin-field label { display: block; font-size: 0.7rem; color: #94a3b8; margin-bottom: 4px; }
+.admin-field input, .admin-field select {
+  width: 100%; background: #0f172a; border: 1.5px solid #334155; color: #e2e8f0;
+  padding: 9px 10px; border-radius: 8px; font-size: 0.85rem; font-family: inherit;
+}
+.admin-field input:focus, .admin-field select:focus { outline: none; border-color: #60a5fa; }
+.admin-row { display: flex; gap: 8px; }
+.admin-row .admin-field { flex: 1; }
+.admin-radio-group { display: flex; gap: 14px; margin-bottom: 10px; }
+.admin-radio-group label { display: flex; align-items: center; gap: 5px; font-size: 0.78rem; color: #cbd5e1; cursor: pointer; }
+.admin-btn {
+  width: 100%; background: #0891b2; border: none; color: #f0fdff;
+  padding: 11px; border-radius: 8px; font-size: 0.85rem; font-weight: 700;
+  cursor: pointer; margin-top: 4px; transition: background 0.15s;
+}
+.admin-btn:hover { background: #0e7490; }
+.admin-msg { font-size: 0.74rem; margin-top: 8px; min-height: 1em; }
+.admin-msg.ok { color: #4ade80; }
+.admin-msg.err { color: #f87171; }
+.admin-replacement-list { display: flex; flex-direction: column; gap: 8px; margin-top: 12px; }
+.admin-replacement-item {
+  background: #0f172a; border: 1px solid #334155; border-radius: 8px;
+  padding: 8px 10px; display: flex; align-items: center; justify-content: space-between; gap: 8px;
+}
+.admin-replacement-info { font-size: 0.72rem; color: #cbd5e1; line-height: 1.4; }
+.admin-replacement-info strong { color: #fbbf24; }
+.admin-replacement-del {
+  background: none; border: 1px solid #7f1d1d; color: #f87171;
+  border-radius: 6px; padding: 4px 9px; font-size: 0.7rem; cursor: pointer; flex-shrink: 0;
+}
+.admin-replacement-del:hover { background: #7f1d1d; color: #fecaca; }
+.admin-empty-note { font-size: 0.72rem; color: #64748b; font-style: italic; margin-top: 8px; }
+
+/* MINI-CALENDARIO SELECCIONABLE (panel admin) */
+.admin-cal-nav {
+  display: flex; align-items: center; justify-content: space-between;
+  margin-bottom: 8px;
+}
+.admin-cal-nav button {
+  background: #0f172a; border: 1px solid #334155; color: #cbd5e1;
+  width: 28px; height: 28px; border-radius: 6px; font-size: 0.9rem; cursor: pointer;
+}
+.admin-cal-nav button:hover { border-color: #60a5fa; }
+.admin-cal-title { font-size: 0.78rem; font-weight: 700; color: #cbd5e1; text-transform: capitalize; }
+.admin-cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; margin-bottom: 6px; }
+.admin-cal-dow { text-align: center; font-size: 0.55rem; color: #475569; text-transform: uppercase; padding-bottom: 2px; }
+.admin-cal-day {
+  position: relative; aspect-ratio: 1; border-radius: 7px; cursor: pointer;
+  background: #0f172a; border: 1.5px solid #1e293b;
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  font-size: 0.68rem; font-weight: 700; color: #e2e8f0; transition: all 0.12s;
+}
+.admin-cal-day.empty { visibility: hidden; cursor: default; }
+.admin-cal-day.disabled { opacity: 0.25; cursor: not-allowed; }
+.admin-cal-day .acd-shift { font-size: 0.46rem; font-weight: 600; margin-top: 1px; text-transform: uppercase; letter-spacing: 0.02em; }
+.admin-cal-day.shift-day { background: #3a2308; border-color: #7c4a12; }
+.admin-cal-day.shift-day .acd-shift { color: #fbbf24; }
+.admin-cal-day.shift-night { background: #142243; border-color: #2c4694; }
+.admin-cal-day.shift-night .acd-shift { color: #93c5fd; }
+.admin-cal-day.shift-free .acd-shift { color: #4ade80; }
+.admin-cal-day:hover:not(.empty):not(.disabled) { border-color: #60a5fa; transform: scale(1.05); }
+.admin-cal-day.selected { border-color: #facc15; background: #422006; box-shadow: 0 0 0 2px #facc15 inset; }
+.admin-cal-day.in-range { border-color: #fbbf24; background: #2c1f06; }
+.admin-cal-day.today { box-shadow: 0 0 0 2px #facc15; }
+.admin-cal-day.today.selected { box-shadow: 0 0 0 2px #facc15, 0 0 0 4px #facc15 inset; }
+.admin-cal-day.manual-libre { background: #3f1d1d; border-color: #b91c1c; }
+.admin-cal-day.manual-libre .acd-shift { color: #fca5a5; }
+.admin-cal-selection-label { font-size: 0.72rem; color: #94a3b8; margin: 6px 0 12px; min-height: 1.2em; }
+.admin-cal-selection-label strong { color: #facc15; }
+</style>
+</head>
+<body>
+
+<div id="login-screen" class="login-screen">
+  <div class="login-card">
+    <h1 class="login-title">Programación de Turnos</h1>
+    <p class="login-sub">Selecciona tu nombre para ver tus turnos</p>
+    <div id="login-options" class="login-options"></div>
+  </div>
+</div>
+
+<div id="app-content" style="display:none;">
+
+<header>
+  <h1>Programación de Turnos</h1>
+  <p>Vigilantes</p>
+  <button id="btn-admin-panel" class="logout-link" style="display:none;" onclick="abrirAdminPanel()">⚙ Administración</button>
+</header>
+
+<button class="logout-link" id="main-logout-link" onclick="volverLogin()">↩ Cambiar vigilante</button>
+
+<div id="view-day" class="view-day-screen" style="display:none;">
+  <div class="day-screen-topbar">
+    <button class="back-link" onclick="volverLogin()">↩ Cambiar vigilante</button>
+  </div>
+  <div class="day-view-row">
+    <div class="day-view-card" id="day-view-card"></div>
+  </div>
+  <div class="swipe-hint">↕ Desliza hacia arriba o abajo para cambiar de día</div>
+  <div class="day-view-actions">
+    <button class="month-view-btn" onclick="irAVistaMensual()">📅 Ver vista mensual</button>
+  </div>
+</div>
+
+<div id="view-month">
+
+<div class="month-nav">
+  <button id="btn-prev" onclick="changeMonth(-1)">‹</button>
+  <h2 id="month-title"></h2>
+  <button onclick="changeMonth(1)">›</button>
+</div>
+
+<div class="tabs" id="worker-tabs">
+  <button id="tab-v01" class="tab-btn active" onclick="selectWorker('V-01',this)">Darwin · V-01</button>
+  <button id="tab-v02" class="tab-btn" onclick="selectWorker('V-02',this)">Ronald · V-02</button>
+  <button id="tab-v03" class="tab-btn" onclick="selectWorker('V-03',this)">Víctor · V-03</button>
+  <button id="tab-all" class="tab-btn all" onclick="selectWorker('ALL',this)">Todos</button>
+</div>
+
+<button id="btn-go-day" class="logout-link" onclick="irAVistaDia()" style="display:none;">📍 Ver mi día de hoy</button>
+
+<div class="legend">
+  <div class="legend-item"><div class="dot shift-day"></div>Turno de día (T-02)</div>
+  <div class="legend-item"><div class="dot shift-night"></div>Turno de noche (T-01)</div>
+  <div class="legend-item"><div class="dot rest"></div>Descanso</div>
+</div>
+
+<div id="month-summary" class="month-summary"></div>
+<div id="calendar"></div>
+
+</div>
+
+<footer>
+  <strong>NOTA:</strong> Los horarios son definitivos. Cualquier modificación debe ser gestionada por la Líder Administrativo con aprobación previa. Queda prohibido realizar cambios sin autorización.
+</footer>
+
+</div>
+
+<!-- Firebase (Realtime Database) -->
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
+
+<script>
+// ─── FIREBASE: inicialización y sincronización en tiempo real ─────────────
+// Todos los datos editables desde el panel admin (nombres de vigilantes,
+// excepciones de vacaciones/permiso, adelantos de hora y días no laborables)
+// se guardan en Firebase Realtime Database en vez de localStorage, para que
+// los cambios se vean en todos los dispositivos conectados.
+const firebaseConfig = {
+  apiKey: "AIzaSyAq5qUPLPGV_d0KodQTXv893Wr2NM6RYIg",
+  authDomain: "horario-42f37.firebaseapp.com",
+  databaseURL: "https://horario-42f37-default-rtdb.firebaseio.com",
+  projectId: "horario-42f37",
+  storageBucket: "horario-42f37.firebasestorage.app",
+  messagingSenderId: "535647312965",
+  appId: "1:535647312965:web:716fdab22941f9f775172c",
+  measurementId: "G-H8R08KT90K"
+};
+// Crea un "db" de respaldo que imita la API de Firebase (ref().set()/on('value',cb))
+// pero guarda en localStorage del propio dispositivo. Se usa solo si el SDK de
+// Firebase no pudo cargarse (sin internet, red bloqueada, CDN no disponible, etc.)
+// para que la app nunca se rompa y siga funcionando localmente como antes.
+function crearDbLocalStub() {
+  return {
+    ref(path) {
+      return {
+        set(value) {
+          try { localStorage.setItem('fb_' + path, JSON.stringify(value)); } catch (e) {}
+          return Promise.resolve();
+        },
+        on(event, cb) {
+          let raw = null;
+          try { raw = localStorage.getItem('fb_' + path); } catch (e) {}
+          // Firebase real responde de forma asíncrona (tras la red); el stub debe
+          // imitar eso con setTimeout, para no disparar el callback antes de que
+          // el resto del script (funciones, TODAY, etc.) termine de definirse.
+          setTimeout(() => cb({ val: () => raw ? JSON.parse(raw) : null }), 0);
+        }
+      };
+    }
+  };
+}
+
+let db;
+if (typeof firebase !== 'undefined') {
+  try {
+    firebase.initializeApp(firebaseConfig);
+    db = firebase.database();
+  } catch (e) {
+    console.error('No se pudo inicializar Firebase, usando almacenamiento local:', e);
+    db = crearDbLocalStub();
+  }
+} else {
+  console.error('Firebase no se cargó (sin conexión o red bloqueada). Usando almacenamiento local del dispositivo; los cambios no se sincronizarán entre dispositivos hasta que haya internet.');
+  db = crearDbLocalStub();
+}
+
+// ─── FESTIVOS COLOMBIA 2025-2027 ───────────────────────────────────────────
+const FESTIVOS = {
+  // 2025
+  '2025-01-01':'Año Nuevo','2025-01-06':'Reyes Magos','2025-03-24':'San José',
+  '2025-04-17':'Jueves Santo','2025-04-18':'Viernes Santo','2025-05-01':'Día del Trabajo',
+  '2025-06-02':'Ascensión','2025-06-23':'Corpus Christi','2025-06-30':'Sagrado Corazón',
+  '2025-06-30':'San Pedro y San Pablo','2025-07-20':'Independencia','2025-08-07':'Batalla de Boyacá',
+  '2025-08-18':'Asunción de la Virgen','2025-10-13':'Día de la Raza',
+  '2025-11-03':'Todos los Santos','2025-11-17':'Independencia de Cartagena',
+  '2025-12-08':'Inmaculada Concepción','2025-12-25':'Navidad',
+  // 2026
+  '2026-01-01':'Año Nuevo','2026-01-12':'Reyes Magos','2026-03-23':'San José',
+  '2026-04-02':'Jueves Santo','2026-04-03':'Viernes Santo','2026-05-01':'Día del Trabajo',
+  '2026-05-18':'Ascensión','2026-06-08':'Corpus Christi','2026-06-15':'Sagrado Corazón',
+  '2026-06-29':'San Pedro y San Pablo','2026-07-13':'Virgen de Chiquinquirá',
+  '2026-07-20':'Independencia','2026-08-07':'Batalla de Boyacá',
+  '2026-08-17':'Asunción de la Virgen','2026-10-12':'Día de la Raza',
+  '2026-11-02':'Todos los Santos','2026-11-16':'Independencia de Cartagena',
+  '2026-12-08':'Inmaculada Concepción','2026-12-25':'Navidad',
+  // 2027
+  '2027-01-01':'Año Nuevo','2027-01-11':'Reyes Magos','2027-03-22':'San José',
+  '2027-04-01':'Jueves Santo','2027-04-02':'Viernes Santo','2027-05-01':'Día del Trabajo',
+  '2027-05-10':'Ascensión','2027-05-31':'Corpus Christi','2027-06-07':'Sagrado Corazón',
+  '2027-06-28':'San Pedro y San Pablo','2027-07-05':'Virgen de Chiquinquirá',
+  '2027-07-20':'Independencia','2027-08-07':'Batalla de Boyacá',
+  '2027-08-16':'Asunción de la Virgen','2027-10-18':'Día de la Raza',
+  '2027-11-01':'Todos los Santos','2027-11-15':'Independencia de Cartagena',
+  '2027-12-08':'Inmaculada Concepción','2027-12-25':'Navidad'
+};
+
+function fmtKey(d) {
+  return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
+}
+function isHoliday(d) { return !!FESTIVOS[fmtKey(d)] || !!NO_LABORABLES[fmtKey(d)]; }
+function holidayName(d) { return FESTIVOS[fmtKey(d)] || (NO_LABORABLES[fmtKey(d)] ? NO_LABORABLES[fmtKey(d)] : ''); }
+function isFestivoOficial(d) { return !!FESTIVOS[fmtKey(d)]; } // solo festivos colombianos (no días bloqueados manualmente)
+
+// ─── DÍAS NO LABORABLES MARCADOS POR EL ADMIN (lun-vie, sin festivo oficial) ─
+// El admin puede marcar un día hábil cualquiera (que no sea ya festivo en Colombia)
+// como "no laborable". A partir de ahí ese día se trata exactamente igual que un
+// festivo/fin de semana para la rotación (isHoliday lo detecta), por lo que el
+// horario de los vigilantes se reordena automáticamente desde ese punto en adelante.
+// Sincronizado en tiempo real vía Firebase Realtime Database (ruta "noLaborables").
+let NO_LABORABLES = {};
+function guardarNoLaborables() {
+  db.ref('noLaborables').set(NO_LABORABLES).catch(e => console.error('Error guardando noLaborables:', e));
+}
+db.ref('noLaborables').on('value', snap => {
+  NO_LABORABLES = snap.val() || {};
+  if (typeof refrescarTrasCambioFestivos === 'function') {
+    refrescarTrasCambioFestivos();
+  } else {
+    // La función todavía no está definida (segundo <script> no cargó aún);
+    // esperamos un tick adicional para que el DOM y scripts terminen de parsear.
+    setTimeout(() => {
+      if (typeof refrescarTrasCambioFestivos === 'function') refrescarTrasCambioFestivos();
+    }, 100);
+  }
+});
+
+// ─── ROTACIÓN ──────────────────────────────────────────────────────────────
+// Punto de anclaje: viernes 19 jun 2026
+// pos=0 (ancla) → V-02 trabaja noche; pos=1 → V-01; pos=2 → V-02 ...
+// Par → V-02, Impar → V-01
+
+const ANCHOR = new Date(2026, 5, 19); // viernes 19 jun 2026
+
+function isWeekday(d) {
+  const dow = d.getDay(); // 0=dom, 6=sab
+  return dow >= 1 && dow <= 5;
+}
+function isWeekend(d) {
+  const dow = d.getDay();
+  return dow === 0 || dow === 6;
+}
+
+// Cuenta días hábiles (lun-vie, incluyendo festivos que caigan en semana)
+// entre ANCHOR y d, para determinar la posición de rotación
+function workdaysBetween(d) {
+  // Número de días hábiles desde ANCHOR hasta d (incluyendo ANCHOR=0)
+  let count = 0;
+  let cur = new Date(ANCHOR);
+  const target = new Date(d.getFullYear(), d.getMonth(), d.getDate());
+  const anchorDay = new Date(ANCHOR.getFullYear(), ANCHOR.getMonth(), ANCHOR.getDate());
+  
+  if (target < anchorDay) {
+    // antes del ancla: contar hacia atrás
+    cur = new Date(target);
+    while (cur < anchorDay) {
+      if (isWeekday(cur)) count--;
+      cur.setDate(cur.getDate()+1);
+    }
+    return count;
+  }
+  // desde ancla hacia adelante
+  while (cur < target) {
+    if (isWeekday(cur)) count++;
+    cur.setDate(cur.getDate()+1);
+  }
+  return count;
+}
+
+// ─── CADENA GLOBAL DE TURNOS ───────────────────────────────────────────────
+// La rotación es una cadena continua de entregas de turno:
+// Cada día genera 1 o 2 turnos según el tipo:
+//   - Día hábil (lun-vie no festivo): 1 turno → noche (T-01), V-01 o V-02 alternando
+//   - Fin de semana / festivo: 2 turnos → mañana (T-02) V-01/V-02, luego noche (T-01) V-03
+//     (la noche del dom no cuenta como "slot de rotación" para V-01/V-02)
+//
+// Secuencia de slots de V-01/V-02 desde el ancla (vie 19 jun):
+//   slot 0 → vie 19 noche   → V-02 (T-01)
+//   slot 1 → sáb 20 mañana  → V-01 (T-02)   ← V-03 hace la noche
+//   slot 2 → dom 21 mañana  → V-02 (T-02)   ← V-03 hace la noche
+//   slot 3 → lun 22 noche   → V-01 (T-01)
+//   slot 4 → mar 23 noche   → V-02 (T-01)
+//   ...
+// Par → V-02, Impar → V-01
+
+function globalSlot(d) {
+  // Cuenta cuántos "slots de V-01/V-02" han ocurrido desde ANCHOR hasta d (inclusive)
+  // ANCHOR (vie 19) = slot 0
+  const target = new Date(d.getFullYear(), d.getMonth(), d.getDate());
+  const anchorDay = new Date(ANCHOR.getFullYear(), ANCHOR.getMonth(), ANCHOR.getDate());
+  let slot = 0;
+  let cur = new Date(anchorDay);
+
+  const step = target >= anchorDay ? 1 : -1;
+
+  if (target < anchorDay) {
+    // Contar hacia atrás
+    cur = new Date(target);
+    while (cur < anchorDay) {
+      if (isWeekday(cur) && !isHoliday(cur)) {
+        slot--; // día hábil: 1 slot (noche)
+      } else if (isWeekend(cur) || isHoliday(cur)) {
+        slot--; // fin de semana/festivo: 1 slot (mañana); la noche es de V-03
+      }
+      cur.setDate(cur.getDate() + 1);
+    }
+    return slot;
+  }
+
+  // Contar hacia adelante desde ancla hasta target
+  while (cur < target) {
+    if (isWeekday(cur) && !isHoliday(cur)) {
+      slot++; // día hábil: 1 slot noche V-01/V-02
+    } else if (isWeekend(cur) || isHoliday(cur)) {
+      slot++; // fin de semana/festivo: 1 slot mañana V-01/V-02
+    }
+    cur.setDate(cur.getDate() + 1);
+  }
+  return slot;
+}
+
+// Calcula el turno de cada trabajador según la rotación normal (sin excepciones)
+function calcularTurnosBase(d) {
+  const fest = isHoliday(d);
+  let v01 = 'X', v02 = 'X', v03 = 'X';
+  const slot = globalSlot(d);
+  // slot par → V-02, impar → V-01
+
+  if (isWeekend(d) || (isWeekday(d) && fest)) {
+    // Fin de semana o festivo entre semana:
+    // V-01/V-02 hace mañana (T-02), V-03 hace noche (T-01)
+    if (slot % 2 === 0) { v02 = 'T-02'; } else { v01 = 'T-02'; }
+    v03 = 'T-01';
+  } else {
+    // Día hábil normal: V-01/V-02 hace noche (T-01)
+    if (slot % 2 === 0) { v02 = 'T-01'; } else { v01 = 'T-01'; }
+  }
+
+  return { v01, v02, v03 };
+}
+
+// ─── EXCEPCIONES (vacaciones / permisos cubiertos por refuerzo externo) ────
+// Cada entrada reemplaza, para esa fecha exacta, el resultado calculado normalmente.
+// Formato manual (solo incluye el campo del vigilante que cambia):
+//   'YYYY-MM-DD': { v01:'VAC', sustituto:'Nombre del refuerzo', sustituyeA:'V-01', turnoSustituto:'T-01' }
+// Sincronizado en tiempo real vía Firebase Realtime Database (ruta "excepciones").
+let EXCEPCIONES = {};
+function guardarExcepciones() {
+  db.ref('excepciones').set(EXCEPCIONES).catch(e => console.error('Error guardando excepciones:', e));
+}
+db.ref('excepciones').on('value', snap => {
+  EXCEPCIONES = snap.val() || {};
+  render();
+  if (viewMode === 'day') renderDayView();
+  if (typeof renderListaReemplazos === 'function') renderListaReemplazos();
+});
+
+const CODE_TO_TAB = { v01:'V-01', v02:'V-02', v03:'V-03' };
+
+// Texto y clase CSS según el motivo del reemplazo (incapacidad/vacaciones/permiso)
+const MOTIVO_INFO = {
+  incapacidad: { label: 'INCAPACIDAD', clase: 'motivo-incapacidad' },
+  vacaciones:  { label: 'VACACIONES',  clase: 'motivo-vacaciones' },
+  permiso:     { label: 'PERMISO',     clase: 'motivo-permiso' }
+};
+
+// Devuelve la info de un motivo; si es un motivo libre ("Otro"), muestra el texto tal cual.
+function getMotivoInfo(motivo) {
+  if (MOTIVO_INFO[motivo]) return MOTIVO_INFO[motivo];
+  return { label: motivo ? motivo.toUpperCase() : 'PERMISO', clase: 'motivo-permiso' };
+}
+
+// Forma rápida de cubrir un rango de días (vacaciones/permiso) con un refuerzo externo.
+// Solo marca los días dentro del rango en que el vigilante ya tenía turno asignado.
+// motivo: 'incapacidad' | 'vacaciones' | 'permiso'
+// Uso: agregarExcepcionRango('2026-07-10','2026-07-15','v01','Carlos Pérez','vacaciones');
+function agregarExcepcionRango(fechaInicioStr, fechaFinStr, workerCode, sustituto, motivo) {
+  const inicio = new Date(fechaInicioStr + 'T00:00:00');
+  const fin = new Date(fechaFinStr + 'T00:00:00');
+  let cur = new Date(inicio);
+  while (cur <= fin) {
+    const key = fmtKey(cur);
+    const base = calcularTurnosBase(cur);
+    const turnoOriginal = base[workerCode];
+    if (turnoOriginal && turnoOriginal !== 'X') {
+      const exc = { sustituto, sustituyeA: CODE_TO_TAB[workerCode], turnoSustituto: turnoOriginal, motivo: motivo || 'permiso' };
+      exc[workerCode] = 'VAC';
+      EXCEPCIONES[key] = exc;
+    }
+    cur.setDate(cur.getDate() + 1);
+  }
+  guardarExcepciones();
+}
+
+// Elimina un reemplazo previamente agregado para una fecha exacta
+function quitarExcepcion(key) {
+  delete EXCEPCIONES[key];
+  guardarExcepciones();
+}
+
+// ─── ADELANTOS DE HORA DE ENTRADA ──────────────────────────────────────────
+// Para días puntuales (lunes a viernes) en que el vigilante debe llegar antes
+// de su horario normal (oficina cierra antes, falla de energía, sin sistema, etc).
+// No reemplaza el turno: solo anota una hora de llegada distinta y el motivo.
+// Formato: AJUSTES['YYYY-MM-DD_v01'] = { fecha, workerCode, hora:'HH:MM', motivo }
+// Sincronizado en tiempo real vía Firebase Realtime Database (ruta "ajustes").
+let AJUSTES = {};
+function guardarAjustesStorage() {
+  db.ref('ajustes').set(AJUSTES).catch(e => console.error('Error guardando ajustes:', e));
+}
+db.ref('ajustes').on('value', snap => {
+  AJUSTES = snap.val() || {};
+  render();
+  if (viewMode === 'day') renderDayView();
+  if (typeof renderListaAjustes === 'function') renderListaAjustes();
+});
+
+function ajusteKey(fechaStr, workerCode) { return fechaStr + '_' + workerCode; }
+
+// Agrega o actualiza el adelanto de hora de entrada de un vigilante en una fecha puntual
+function agregarAjusteHora(fechaStr, workerCode, hora, motivo) {
+  const key = ajusteKey(fechaStr, workerCode);
+  AJUSTES[key] = { fecha: fechaStr, workerCode, hora, motivo };
+  guardarAjustesStorage();
+}
+
+function quitarAjusteHora(key) {
+  delete AJUSTES[key];
+  guardarAjustesStorage();
+}
+
+// Devuelve el adelanto de hora (si existe) para un vigilante en una fecha dada
+function getAjusteHora(d, workerCode) {
+  return AJUSTES[ajusteKey(fmtKey(d), workerCode)] || null;
+}
+
+// Retorna el turno de cada trabajador en la fecha d, aplicando excepciones si existen
+function getTurnos(d) {
+  const key = fmtKey(d);
+  const exc = EXCEPCIONES[key];
+  const base = calcularTurnosBase(d);
+  if (!exc) return base;
+
+  return {
+    v01: exc.v01 !== undefined ? exc.v01 : base.v01,
+    v02: exc.v02 !== undefined ? exc.v02 : base.v02,
+    v03: exc.v03 !== undefined ? exc.v03 : base.v03,
+    sustituto: exc.sustituto || null,
+    sustituyeA: exc.sustituyeA || null,
+    turnoSustituto: exc.turnoSustituto || null,
+    motivo: exc.motivo || null
+  };
+}
+
+// Devuelve el turno que le toca a un sustituto temporal específico (por nombre) en la fecha d,
+// o undefined si ese día no le corresponde nada a esa persona.
+// Esto permite que un temporal "inicie sesión" y vea su propio día, igual que un vigilante fijo.
+function getTurnoTemporal(d, nombreTemporal) {
+  const t = getTurnos(d);
+  if (t.sustituto === nombreTemporal) return t.turnoSustituto;
+  return undefined;
+}
+
+// Horas por turno
+function horasShift(s) {
+  if (s === 'T-01') return 14.5; // 5PM→7:30AM = 14.5h
+  if (s === 'T-02') return 9.5;  // 7:30AM→5PM = 9.5h
+  return 0;
+}
+
+// Horas reales de un turno en una fecha/vigilante puntual, sumando el tiempo extra
+// si ese día hay un adelanto de hora de entrada registrado.
+function horasShiftReal(date, wkey) {
+  const shift = getTurnos(date)[wkey];
+  let horas = horasShift(shift);
+  if (shift === 'T-01' || shift === 'T-02') {
+    const normal = shift === 'T-01' ? 1020 : 450;
+    const inicio = inicioRealTurno(date, wkey, shift);
+    horas += (normal - inicio) / 60;
+  }
+  return horas;
+}
+
+// ─── PERSONAL (nombre actual de cada puesto) ───────────────────────────────
+// Los nombres se editan desde el panel de Administración (dentro de "Ver todos").
+// Sincronizado en tiempo real vía Firebase Realtime Database (ruta "workers").
+const WORKERS_DEFAULT = { 'V-01': 'Darwin', 'V-02': 'Ronald', 'V-03': 'Víctor' };
+let WORKERS = Object.assign({}, WORKERS_DEFAULT);
+function guardarWorkers() {
+  db.ref('workers').set(WORKERS).catch(e => console.error('Error guardando workers:', e));
+}
+db.ref('workers').on('value', snap => {
+  WORKERS = Object.assign({}, WORKERS_DEFAULT, snap.val() || {});
+  render();
+  if (viewMode === 'day') renderDayView();
+  if (typeof aplicarNombres === 'function') aplicarNombres();
+  if (typeof construirLogin === 'function') construirLogin();
+});
+
+// ─── ESTADO ────────────────────────────────────────────────────────────────
+const TODAY = new Date();
+let currentYear = TODAY.getFullYear();
+let currentMonth = TODAY.getMonth();
+let selectedWorker = 'V-01';
+let isAdmin = false; // true solo si se entró como "Ver todos (admin)"
+let viewMode = 'day'; // 'day' | 'month'
+let currentDayDate = new Date(TODAY);
+let currentTemporal = null; // nombre del sustituto temporal con sesión iniciada (si aplica)
+
+// Devuelve la lista de reemplazos temporales activos justo HOY (para mostrarlos en el login).
+// Un reemplazo "desaparece" del login automáticamente cuando termina su fecha/rango.
+function getTemporalesActivosHoy() {
+  const t = getTurnos(TODAY);
+  if (!t.sustituto || !t.sustituyeA) return [];
+  return [{ nombre: t.sustituto, sustituyeA: t.sustituyeA, turno: t.turnoSustituto }];
+}
+
+const MESES = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
+const DIAS_CORTO = ['Dom','Lun','Mar','Mié','Jue','Vie','Sáb'];
+const DIAS_LARGO = ['Domingo','Lunes','Martes','Miércoles','Jueves','Viernes','Sábado'];
+
+const START_YEAR = 2026;
+const START_MONTH = 5; // junio = índice 5
+const START_DAY = 19;
+
+function minFecha() { return new Date(START_YEAR, START_MONTH, START_DAY); }
+function clampMinFecha(d) { return d < minFecha() ? minFecha() : d; }
+
+function changeMonth(delta) {
+  let ny = currentYear, nm = currentMonth + delta;
+  if (nm > 11) { nm = 0; ny++; }
+  if (nm < 0) { nm = 11; ny--; }
+  // No permitir ir antes de junio 2026
+  if (ny < START_YEAR || (ny === START_YEAR && nm < START_MONTH)) return;
+  currentMonth = nm;
+  currentYear = ny;
+  render();
+}
+
+function selectWorker(w, btn) {
+  selectedWorker = w;
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  render();
+}
+
+// ─── RENDER ────────────────────────────────────────────────────────────────
+function render() {
+  document.getElementById('btn-go-day').style.display = selectedWorker === 'ALL' ? 'none' : '';
+  document.getElementById('worker-tabs').style.display = isAdmin ? '' : 'none';
+  document.getElementById('btn-admin-panel').style.display = isAdmin ? '' : 'none';
+  document.getElementById('month-title').textContent = MESES[currentMonth] + ' ' + currentYear;
+
+  // Deshabilitar flecha izquierda si estamos en el mes inicial
+  const isFirstMonth = (currentYear === START_YEAR && currentMonth === START_MONTH);
+  document.getElementById('btn-prev').disabled = isFirstMonth;
+  document.getElementById('btn-prev').style.opacity = isFirstMonth ? '0.3' : '1';
+  document.getElementById('btn-prev').style.cursor = isFirstMonth ? 'not-allowed' : 'pointer';
+
+  const firstDay = new Date(currentYear, currentMonth, 1);
+  const lastDay = new Date(currentYear, currentMonth+1, 0);
+  const startDow = firstDay.getDay(); // 0=dom
+
+  // Acumular horas del mes (desde día 19 si es junio 2026)
+  let mesH = { v01:0, v02:0, v03:0 };
+  const startDay = (currentYear === START_YEAR && currentMonth === START_MONTH) ? START_DAY : 1;
+  for (let d = startDay; d <= lastDay.getDate(); d++) {
+    const date = new Date(currentYear, currentMonth, d);
+    const t = getTurnos(date);
+    mesH.v01 += horasShiftReal(date, 'v01');
+    mesH.v02 += horasShiftReal(date, 'v02');
+    mesH.v03 += horasShiftReal(date, 'v03');
+  }
+
+  // Resumen mes
+  const mesNombre = MESES[currentMonth] + ' ' + currentYear;
+  const summaryCards = {
+    'V-01': `<div class="summary-card v01">
+      <div class="s-name">${WORKERS['V-01']} V-01</div>
+      <div class="s-hours">${mesH.v01.toFixed(1)}</div>
+      <div class="s-label">hrs · ${mesNombre}</div>
+    </div>`,
+    'V-02': `<div class="summary-card v02">
+      <div class="s-name">${WORKERS['V-02']} V-02</div>
+      <div class="s-hours">${mesH.v02.toFixed(1)}</div>
+      <div class="s-label">hrs · ${mesNombre}</div>
+    </div>`,
+    'V-03': `<div class="summary-card v03">
+      <div class="s-name">${WORKERS['V-03']} V-03</div>
+      <div class="s-hours">${mesH.v03.toFixed(1)}</div>
+      <div class="s-label">hrs · ${mesNombre}</div>
+    </div>`
+  };
+  const summaryEl = document.getElementById('month-summary');
+  if (selectedWorker === 'ALL') {
+    summaryEl.style.gridTemplateColumns = 'repeat(3, 1fr)';
+    summaryEl.innerHTML = summaryCards['V-01'] + summaryCards['V-02'] + summaryCards['V-03'];
+  } else {
+    summaryEl.style.gridTemplateColumns = '1fr';
+    summaryEl.innerHTML = summaryCards[selectedWorker];
+  }
+
+  // Agrupar días en semanas (lun-dom, empezando domingo=col0)
+  // Usamos semanas de Dom a Sáb
+  const totalCells = startDow + lastDay.getDate();
+  const weeks = [];
+  let week = [];
+  for (let i = 0; i < startDow; i++) week.push(null);
+  for (let d = 1; d <= lastDay.getDate(); d++) {
+    week.push(d);
+    if (week.length === 7) { weeks.push(week); week = []; }
+  }
+  if (week.length > 0) {
+    while (week.length < 7) week.push(null);
+    weeks.push(week);
+  }
+
+  let html = '';
+
+  if (selectedWorker === 'ALL') {
+    html += renderAllView(weeks);
+  } else {
+    html += renderSingleView(weeks);
+  }
+
+  document.getElementById('calendar').innerHTML = html;
+}
+
+function renderSingleView(weeks) {
+  const wkey = selectedWorker === 'V-01' ? 'v01' : selectedWorker === 'V-02' ? 'v02' : 'v03';
+  let html = '';
+
+  weeks.forEach((week, wi) => {
+    // Horas semana
+    let semHoras = 0;
+    week.forEach(d => {
+      if (!d) return;
+      const date = new Date(currentYear, currentMonth, d);
+      semHoras += horasShiftReal(date, wkey);
+    });
+
+    // Número de semana del mes
+    const weekNum = wi + 1;
+    html += `<div class="week-block">
+      <div class="week-header">
+        <span class="week-label">Semana ${weekNum}</span>
+        <span class="week-hours">
+          <span class="${wkey}">${semHoras.toFixed(1)} hrs</span>
+        </span>
+      </div>
+      <div class="days-grid">`;
+
+    // Headers
+    DIAS_CORTO.forEach(dn => {
+      html += `<div style="text-align:center;font-size:0.6rem;color:#334155;text-transform:uppercase;letter-spacing:0.06em;padding-bottom:3px;">${dn}</div>`;
+    });
+
+    week.forEach(d => {
+      if (!d) { html += `<div class="day-card empty"></div>`; return; }
+      // Ocultar días anteriores al 19 de junio 2026
+      if (currentYear === START_YEAR && currentMonth === START_MONTH && d < START_DAY) {
+        html += `<div class="day-card empty"></div>`; return;
+      }
+      const date = new Date(currentYear, currentMonth, d);
+      const t = getTurnos(date);
+      const shift = t[wkey];
+      const fest = isHoliday(date);
+      const festName = holidayName(date);
+      const isToday = date.toDateString() === TODAY.toDateString();
+
+      let cls = 'free';
+      let badge = 'LIBRE';
+      const esReemplazo = t.sustituyeA === selectedWorker && t.sustituto;
+
+      if (esReemplazo && shift === 'VAC') {
+        const info = getMotivoInfo(t.motivo);
+        cls = info.clase;
+        badge = info.label;
+      } else if (shift === 'T-01' || shift === 'T-02') {
+        cls = shift === 'T-01' ? 'shift-night' : 'shift-day';
+        badge = shift === 'T-01' ? 'T-01 🌙' : 'T-02 ☀️';
+      } else if (shift === 'VAC') { cls = 'free'; badge = 'VACACIONES'; }
+
+      const ajuste = (shift === 'T-01' || shift === 'T-02') ? getAjusteHora(date, wkey) : null;
+
+      html += `<div class="day-card ${cls}${isToday?' today':''}">
+        ${isToday ? '<span class="today-tag">HOY</span>' : ''}
+        <div class="day-name">${DIAS_CORTO[date.getDay()]}</div>
+        <div class="day-num">${d}</div>
+        <span class="shift-badge">${badge}</span>
+        ${esReemplazo ? `<div class="sub-tag">Cubre: ${t.sustituto}</div>` : ''}
+        ${ajuste ? `<div class="ajuste-tag">⏰ Llega ${ajuste.hora}</div>` : ''}
+        ${fest ? `<div class="holiday-tag">${festName.split(' ').slice(0,2).join(' ')}</div>` : ''}
+      </div>`;
+    });
+
+    html += `</div></div>`;
+  });
+
+  return html;
+}
+
+function renderAllView(weeks) {
+  let html = '';
+
+  weeks.forEach((week, wi) => {
+    let semH = { v01:0, v02:0, v03:0 };
+    week.forEach(d => {
+      if (!d) return;
+      const date = new Date(currentYear, currentMonth, d);
+      semH.v01 += horasShiftReal(date, 'v01');
+      semH.v02 += horasShiftReal(date, 'v02');
+      semH.v03 += horasShiftReal(date, 'v03');
+    });
+
+    html += `<div class="week-block">
+      <div class="week-header">
+        <span class="week-label">Semana ${wi+1}</span>
+        <span class="week-hours">
+          <span class="h01">${semH.v01.toFixed(1)}h</span> ·
+          <span class="h02">${semH.v02.toFixed(1)}h</span> ·
+          <span class="h03">${semH.v03.toFixed(1)}h</span>
+        </span>
+      </div>
+      <div class="days-grid">`;
+
+    DIAS_CORTO.forEach(dn => {
+      html += `<div style="text-align:center;font-size:0.6rem;color:#334155;text-transform:uppercase;letter-spacing:0.06em;padding-bottom:3px;">${dn}</div>`;
+    });
+
+    week.forEach(d => {
+      if (!d) { html += `<div class="day-card-all empty"></div>`; return; }
+      // Ocultar días anteriores al 19 de junio 2026
+      if (currentYear === START_YEAR && currentMonth === START_MONTH && d < START_DAY) {
+        html += `<div class="day-card-all empty"></div>`; return;
+      }
+      const date = new Date(currentYear, currentMonth, d);
+      const t = getTurnos(date);
+      const fest = isHoliday(date);
+      const isToday = date.toDateString() === TODAY.toDateString();
+
+      function miniShift(s, name, isRefuerzo, codigoVigilante) {
+        let cls = 'rest', label = 'L';
+        const esElReemplazado = codigoVigilante && t.sustituyeA === CODE_TO_TAB[codigoVigilante] && t.sustituto;
+        if (esElReemplazado && s === 'VAC') {
+          const info = getMotivoInfo(t.motivo);
+          cls = info.clase;
+          label = info.label.slice(0, 4); // espacio reducido en mini-tarjeta
+        } else if (s === 'T-01' || s === 'T-02') {
+          cls = s === 'T-01' ? 'shift-night' : 'shift-day';
+          label = s;
+        } else if (s === 'VAC') { cls = 'rest'; label = 'VAC'; }
+        const extra = isRefuerzo ? ' refuerzo' : '';
+        return `<div class="mini-name">${name}</div><div class="mini-shift ${cls}${extra}">${label}</div>`;
+      }
+
+      html += `<div class="day-card-all${fest?' holiday-day':''}${isToday?' today':''}">
+        ${isToday ? '<span class="today-tag">HOY</span>' : ''}
+        <div class="day-name">${DIAS_CORTO[date.getDay()]}</div>
+        <div class="day-num">${d}</div>
+        ${miniShift(t.v01, WORKERS['V-01'], false, 'v01')}
+        ${miniShift(t.v02, WORKERS['V-02'], false, 'v02')}
+        ${miniShift(t.v03, WORKERS['V-03'], false, 'v03')}
+        ${t.sustituto ? miniShift(t.turnoSustituto, t.sustituto, true) : ''}
+      </div>`;
+    });
+
+    html += `</div></div>`;
+  });
+
+  return html;
+}
+
+// Aplica los nombres actuales de WORKERS a las pestañas v01/v02/v03
+function aplicarNombres() {
+  document.getElementById('tab-v01').textContent = WORKERS['V-01'] + ' · V-01';
+  document.getElementById('tab-v02').textContent = WORKERS['V-02'] + ' · V-02';
+  document.getElementById('tab-v03').textContent = WORKERS['V-03'] + ' · V-03';
+}
+
+// ─── VISTA DEL DÍA ──────────────────────────────────────────────────────────
+// ─── ÍCONOS SVG DECORATIVOS PARA LA VISTA DEL DÍA ──────────────────────────
+const ICONOS_DIA = {
+  noche: `<svg viewBox="0 0 64 64"><path d="M41 16a18 18 0 1 0 7 31.6A15 15 0 0 1 41 16z" fill="#bfdbfe"/><circle cx="48" cy="14" r="2" fill="#bfdbfe"/><circle cx="55" cy="22" r="1.3" fill="#bfdbfe"/><circle cx="44" cy="8" r="1.1" fill="#bfdbfe"/></svg>`,
+  dia: `<svg viewBox="0 0 64 64"><circle cx="32" cy="32" r="13" fill="#fbbf24"/><g stroke="#fbbf24" stroke-width="3.2" stroke-linecap="round"><line x1="32" y1="4" x2="32" y2="12"/><line x1="32" y1="52" x2="32" y2="60"/><line x1="4" y1="32" x2="12" y2="32"/><line x1="52" y1="32" x2="60" y2="32"/><line x1="12.3" y1="12.3" x2="17.9" y2="17.9"/><line x1="46.1" y1="46.1" x2="51.7" y2="51.7"/><line x1="51.7" y1="12.3" x2="46.1" y2="17.9"/><line x1="17.9" y1="46.1" x2="12.3" y2="51.7"/></g></svg>`,
+  vacaciones: `<svg viewBox="0 0 64 64"><path d="M32 8C20 16 13 27 13 38a19 19 0 0 0 38 0c0-11-7-22-19-30z" fill="#34d399"/><path d="M32 30v26" stroke="#0f172a" stroke-width="2" stroke-linecap="round" opacity="0.35"/></svg>`,
+  libre: `<svg viewBox="0 0 64 64"><path d="M16 42a11 11 0 0 1 10.5-11A13 13 0 0 1 51 36.5 9.5 9.5 0 0 1 49.5 47H17a8 8 0 0 1-1-5z" fill="#334155"/><text x="42" y="20" font-size="9" font-weight="700" fill="#475569">z</text><text x="49" y="13" font-size="6" font-weight="700" fill="#475569">z</text></svg>`
+};
+function iconoTurno(tipo) {
+  if (tipo === 'T-01') return ICONOS_DIA.noche;
+  if (tipo === 'T-02') return ICONOS_DIA.dia;
+  if (tipo === 'VAC') return ICONOS_DIA.vacaciones;
+  return ICONOS_DIA.libre;
+}
+
+// ─── LÍNEA DE TIEMPO DINÁMICA (gráfica horizontal, media hora en media hora) ──
+// Convierte 'HH:MM' a minutos desde medianoche
+function horaAMin(horaStr) {
+  const [h, m] = horaStr.split(':').map(Number);
+  return h * 60 + m;
+}
+
+// Convierte minutos desde medianoche a etiqueta "H:MM AM/PM"
+function minToLabel(min) {
+  const h = Math.floor(min / 60) % 24;
+  const m = min % 60;
+  const ampm = h < 12 ? 'AM' : 'PM';
+  let h12 = h % 12; if (h12 === 0) h12 = 12;
+  return `${h12}:${String(m).padStart(2, '0')} ${ampm}`;
+}
+
+// Minuto real de inicio de un turno en una fecha, considerando un adelanto de hora si existe.
+// shiftType: 'T-01' (normalmente empieza a las 1020 = 5:00 PM) o 'T-02' (normalmente 450 = 7:30 AM)
+function inicioRealTurno(date, wkey, shiftType) {
+  const normal = shiftType === 'T-01' ? 1020 : 450;
+  const ajuste = getAjusteHora(date, wkey);
+  if (ajuste) return Math.min(normal, horaAMin(ajuste.hora));
+  return normal;
+}
+
+// Un día se divide en 3 tramos según los horarios reales de turno:
+//   00:00–07:30  → depende del turno de NOCHE del día ANTERIOR (T-01 que cruza la medianoche)
+//   07:30–17:00  → depende del turno T-02 (día) de HOY
+//   17:00–24:00  → depende del turno T-01 (noche) de HOY (cruza hacia el día siguiente)
+function construirLineaTiempo(date, wkey, fest) {
+  const prevDate = new Date(date);
+  prevDate.setDate(prevDate.getDate() - 1);
+  const prevShift = getTurnos(prevDate)[wkey];
+  const todayShift = getTurnos(date)[wkey];
+
+  // Si hay un adelanto de hora registrado, los límites del tramo correspondiente se recorren antes
+  let boundary1 = 450, boundary2 = 1020;
+  if (todayShift === 'T-02') boundary1 = inicioRealTurno(date, wkey, 'T-02');
+  if (todayShift === 'T-01') boundary2 = inicioRealTurno(date, wkey, 'T-01');
+
+  const segmentos = [
+    { ini: 0,         fin: boundary1, trabaja: prevShift === 'T-01',  tipo: 'shift-night' },  // 00:00–boundary1
+    { ini: boundary1, fin: boundary2, trabaja: todayShift === 'T-02', tipo: 'shift-day' },     // boundary1–boundary2
+    { ini: boundary2, fin: 1440,      trabaja: todayShift === 'T-01', tipo: 'shift-night' }    // boundary2–24:00
+  ];
+
+  let segsHtml = '';
+  segmentos.forEach(s => {
+    const top = (s.ini / 1440) * 100;
+    const alto = ((s.fin - s.ini) / 1440) * 100;
+    segsHtml += `<div class="tl-seg ${s.trabaja ? s.tipo : 'free'}" style="top:${top}%;height:${alto}%;"></div>`;
+  });
+
+  // 3 niveles de marcas: cada 30 min (fina), cada hora (media), cada 3h (fuerte + etiqueta)
+  let minorTicks = '', hourTicks = '', majorTicks = '', labels = '';
+  for (let m = 0; m <= 1440; m += 30) {
+    const top = (m / 1440) * 100;
+    if (m % 180 === 0) {
+      majorTicks += `<div class="tl-tick-major" style="top:${top}%;"></div>`;
+      const hh = Math.floor(m / 60) % 24;
+      const lab = hh === 0 ? '12a' : hh === 12 ? '12p' : hh < 12 ? hh + 'a' : (hh - 12) + 'p';
+      labels += `<div class="tl-label" style="top:${top}%;">${lab}</div>`;
+    } else if (m % 60 === 0) {
+      hourTicks += `<div class="tl-tick-hour" style="top:${top}%;"></div>`;
+    } else if (m < 1440) {
+      minorTicks += `<div class="tl-tick-minor" style="top:${top}%;"></div>`;
+    }
+  }
+
+  // Flecha flotante que señala la hora actual (solo si se está viendo el día de HOY)
+  let nowHtml = '';
+  const esHoy = date.toDateString() === TODAY.toDateString();
+  if (esHoy) {
+    const ahora = new Date();
+    const minAhora = ahora.getHours() * 60 + ahora.getMinutes();
+    const top = (minAhora / 1440) * 100;
+    const hh12 = ahora.getHours() % 12 === 0 ? 12 : ahora.getHours() % 12;
+    const ampm = ahora.getHours() < 12 ? 'a' : 'p';
+    const horaTxt = `${hh12}:${String(ahora.getMinutes()).padStart(2,'0')}${ampm}`;
+    nowHtml = `
+      <div class="tl-now-arrow" style="top:${top}%;">
+        <div class="tl-now-float">
+          <div class="arrow-head"></div>
+          <div class="tl-now-time">${horaTxt}</div>
+        </div>
+      </div>`;
+  }
+
+  return `<div class="day-timeline-wrap">
+    <div class="day-timeline-h">
+      <div class="day-timeline-track">
+        ${segsHtml}
+        ${minorTicks}
+        ${hourTicks}
+        ${majorTicks}
+      </div>
+      ${labels}
+      ${nowHtml}
+    </div>
+  </div>`;
+}
+
+// Barra de progreso del turno actual: solo se muestra mientras se está trabajando HOY
+function progresoTurnoHTML(date, wkey) {
+  if (date.toDateString() !== TODAY.toDateString()) return '';
+  const ahora = new Date();
+  const minAhora = ahora.getHours() * 60 + ahora.getMinutes();
+  const prevDate = new Date(date);
+  prevDate.setDate(prevDate.getDate() - 1);
+  const prevShift = getTurnos(prevDate)[wkey];
+  const todayShift = getTurnos(date)[wkey];
+
+  const inicioAyerT01 = prevShift === 'T-01' ? inicioRealTurno(prevDate, wkey, 'T-01') : null;
+  const inicioHoyT02 = todayShift === 'T-02' ? inicioRealTurno(date, wkey, 'T-02') : null;
+  const inicioHoyT01 = todayShift === 'T-01' ? inicioRealTurno(date, wkey, 'T-01') : null;
+
+  let transcurrido, duracion;
+  if (inicioAyerT01 !== null && minAhora < 450) {
+    duracion = (1440 - inicioAyerT01) + 450; // turno de noche que empezó ayer (a la hora real de inicio)
+    transcurrido = minAhora + (1440 - inicioAyerT01);
+  } else if (inicioHoyT02 !== null && minAhora >= inicioHoyT02 && minAhora < 1020) {
+    duracion = 1020 - inicioHoyT02; // turno de día
+    transcurrido = minAhora - inicioHoyT02;
+  } else if (inicioHoyT01 !== null && minAhora >= inicioHoyT01) {
+    duracion = (1440 - inicioHoyT01) + 450; // turno de noche que empieza hoy
+    transcurrido = minAhora - inicioHoyT01;
+  } else {
+    return '';
+  }
+
+  const pct = Math.min(100, Math.max(0, (transcurrido / duracion) * 100));
+  return `<div class="day-progress-wrap">
+    <div class="day-progress-text">Turno ${pct.toFixed(0)}%</div>
+    <div class="day-progress-bar"><div class="day-progress-fill" style="width:${pct.toFixed(0)}%;"></div></div>
+  </div>`;
+}
+
+// Texto de estado en vivo: solo se muestra cuando se está viendo el día de HOY
+function estadoActualTexto(date, wkey) {
+  if (date.toDateString() !== TODAY.toDateString()) return '';
+  const ahora = new Date();
+  const minAhora = ahora.getHours() * 60 + ahora.getMinutes();
+  const prevDate = new Date(date);
+  prevDate.setDate(prevDate.getDate() - 1);
+  const prevShift = getTurnos(prevDate)[wkey];
+  const todayShift = getTurnos(date)[wkey];
+
+  let boundary1 = 450, boundary2 = 1020;
+  if (todayShift === 'T-02') boundary1 = inicioRealTurno(date, wkey, 'T-02');
+  if (todayShift === 'T-01') boundary2 = inicioRealTurno(date, wkey, 'T-01');
+
+  let trabajando, finMin, finLabel;
+  if (minAhora < boundary1) {
+    trabajando = prevShift === 'T-01';
+    finMin = boundary1; finLabel = minToLabel(boundary1);
+  } else if (minAhora < boundary2) {
+    trabajando = todayShift === 'T-02';
+    finMin = boundary2; finLabel = minToLabel(boundary2);
+  } else {
+    trabajando = todayShift === 'T-01';
+    finMin = 1440; finLabel = '12:00 AM';
+  }
+
+  const restante = finMin - minAhora;
+  const h = Math.floor(restante / 60), m = restante % 60;
+  const faltan = h > 0 ? `${h}h ${m}m` : `${m}m`;
+
+  if (trabajando) {
+    return `<div class="day-status-pill working">🔴 Trabajando ahora · libre en ${faltan} (${finLabel})</div>`;
+  }
+  return `<div class="day-status-pill free">🟢 Libre ahora · hasta las ${finLabel}</div>`;
+}
+
+function renderDayView() {
+  const wkey = selectedWorker === 'V-01' ? 'v01' : selectedWorker === 'V-02' ? 'v02' : 'v03';
+  const date = currentDayDate;
+  const t = getTurnos(date);
+  const shift = t[wkey];
+  const fest = isHoliday(date);
+  const festName = holidayName(date);
+  const isToday = date.toDateString() === TODAY.toDateString();
+  const horas = horasShiftReal(date, wkey);
+
+  const esReemplazo = t.sustituyeA === selectedWorker && t.sustituto;
+
+  let cls = 'free', big = 'LIBRE', sub = 'Día de descanso';
+  if (esReemplazo && shift === 'VAC') {
+    const info = getMotivoInfo(t.motivo);
+    cls = info.clase;
+    big = info.label;
+    sub = `Cubierto por ${t.sustituto}`;
+  } else if (shift === 'T-01' || shift === 'T-02') {
+    cls = shift === 'T-01' ? 'shift-night' : 'shift-day';
+    if (shift === 'T-01') { big = 'T-01 · NOCHE'; sub = '5:00 PM → 7:30 AM'; }
+    else { big = 'T-02 · DÍA'; sub = '7:30 AM → 5:00 PM'; }
+  } else if (shift === 'VAC') { cls = 'free'; big = 'VACACIONES'; sub = 'Permiso / vacaciones'; }
+
+  const ajuste = (shift === 'T-01' || shift === 'T-02') ? getAjusteHora(date, wkey) : null;
+
+  const card = document.getElementById('day-view-card');
+  card.className = 'day-view-card ' + cls;
+  const progresoHtml = progresoTurnoHTML(date, wkey);
+  card.innerHTML = `
+    ${progresoHtml}
+    <div class="day-view-main">
+      <div class="day-view-icon">${iconoTurno(shift)}</div>
+      <div class="day-view-date">${DIAS_LARGO[date.getDay()]} ${date.getDate()} de ${MESES[date.getMonth()]}</div>
+      ${isToday ? '<span class="today-pill">HOY</span>' : ''}
+      <div class="day-view-badge">${big}</div>
+      <div class="day-view-time">${sub}</div>
+      ${horas > 0 ? `<div class="day-view-hours">${horas} hrs</div>` : ''}
+      ${esReemplazo ? `<div class="day-view-sub">Cubre: ${t.sustituto}</div>` : ''}
+      ${ajuste ? `<div class="day-view-ajuste">⏰ Debe llegar a las ${ajuste.hora} · ${ajuste.motivo}</div>` : ''}
+      ${fest ? `<div class="day-view-holiday">🎉 ${festName}</div>` : ''}
+      ${estadoActualTexto(date, wkey)}
+    </div>
+    <div class="day-view-side">
+      <div class="side-bar-label">Horario</div>
+      ${construirLineaTiempo(date, wkey, fest)}
+    </div>
+  `;
+}
+
+function cambiarDia(delta) {
+  const next = new Date(currentDayDate);
+  next.setDate(next.getDate() + delta);
+  if (next < minFecha()) return;
+
+  const card = document.getElementById('day-view-card');
+  const outCls = delta > 0 ? 'slide-out-up' : 'slide-out-down';
+  const inCls = delta > 0 ? 'slide-in-up' : 'slide-in-down';
+
+  card.classList.add(outCls);
+  setTimeout(() => {
+    currentDayDate = next;
+    renderDayView();
+    card.classList.remove(outCls);
+    card.classList.add(inCls);
+    setTimeout(() => card.classList.remove(inCls), 230);
+  }, 160);
+}
+
+// Swipe táctil vertical sobre la tarjeta del día (estilo TikTok)
+let touchStartY = null;
+document.getElementById('day-view-card').addEventListener('touchstart', e => {
+  touchStartY = e.changedTouches[0].clientY;
+});
+document.getElementById('day-view-card').addEventListener('touchend', e => {
+  if (touchStartY === null) return;
+  const dy = e.changedTouches[0].clientY - touchStartY;
+  if (Math.abs(dy) > 40) {
+    if (dy < 0) cambiarDia(1);   // deslizar hacia arriba → día siguiente
+    else cambiarDia(-1);          // deslizar hacia abajo → día anterior
+  }
+  touchStartY = null;
+});
+
+function irAVistaMensual() {
+  viewMode = 'month';
+  document.querySelector('header').style.display = '';
+  document.getElementById('main-logout-link').style.display = '';
+  document.getElementById('view-day').style.display = 'none';
+  document.getElementById('view-month').style.display = '';
+  render();
+}
+
+function irAVistaDia() {
+  viewMode = 'day';
+  currentDayDate = clampMinFecha(new Date(TODAY));
+  document.querySelector('header').style.display = 'none';
+  document.getElementById('main-logout-link').style.display = 'none';
+  document.getElementById('view-month').style.display = 'none';
+  document.getElementById('view-day').style.display = 'flex';
+  renderDayView();
+}
+
+// ─── ACCESO DE REEMPLAZO TEMPORAL ──────────────────────────────────────────
+// El sustituto temporal entra con su nombre (no tiene pestaña fija ni vista mensual:
+// solo ve el día de hoy, que es el único que le corresponde).
+function entrarComoTemporal(nombre) {
+  isAdmin = false;
+  currentTemporal = nombre;
+  currentDayDate = new Date(TODAY);
+  document.getElementById('login-screen').style.display = 'none';
+  document.getElementById('app-content').style.display = '';
+  document.querySelector('header').style.display = 'none';
+  document.getElementById('main-logout-link').style.display = 'none';
+  document.getElementById('view-month').style.display = 'none';
+  document.getElementById('view-day').style.display = 'flex';
+  document.querySelector('#view-day .swipe-hint').style.display = 'none';
+  document.querySelector('#view-day .day-view-actions').style.display = 'none';
+  renderDayViewTemporal();
+}
+
+// Vista de día simplificada para el sustituto temporal: muestra el turno que le toca
+// hoy (cubriendo al vigilante original), sin línea de tiempo de días previos/siguientes.
+function renderDayViewTemporal() {
+  const date = TODAY;
+  const t = getTurnos(date);
+  const shift = t.sustituto === currentTemporal ? t.turnoSustituto : null;
+  const fest = isHoliday(date);
+  const festName = holidayName(date);
+  const horas = horasShift(shift);
+  const cubreA = WORKERS[t.sustituyeA] || t.sustituyeA;
+
+  let cls = 'free', big = 'SIN TURNO HOY', sub = 'No tienes un turno asignado hoy';
+  if (shift === 'T-01' || shift === 'T-02') {
+    cls = shift === 'T-01' ? 'shift-night' : 'shift-day';
+    if (shift === 'T-01') { big = 'T-01 · NOCHE'; sub = '5:00 PM → 7:30 AM'; }
+    else { big = 'T-02 · DÍA'; sub = '7:30 AM → 5:00 PM'; }
+  }
+
+  const card = document.getElementById('day-view-card');
+  card.className = 'day-view-card ' + cls;
+  card.innerHTML = `
+    <div class="day-view-main">
+      <div class="day-view-icon">${iconoTurno(shift)}</div>
+      <div class="day-view-date">${DIAS_LARGO[date.getDay()]} ${date.getDate()} de ${MESES[date.getMonth()]}</div>
+      <span class="today-pill">HOY</span>
+      <div class="day-view-badge">${big}</div>
+      <div class="day-view-time">${sub}</div>
+      ${horas > 0 ? `<div class="day-view-hours">${horas} hrs</div>` : ''}
+      ${shift ? `<div class="day-view-sub">Cubres a: ${cubreA}</div>` : ''}
+      ${fest ? `<div class="day-view-holiday">🎉 ${festName}</div>` : ''}
+    </div>
+  `;
+}
+
+// ─── LOGIN (selección de vigilante, sin contraseña) ────────────────────────
+const PERSON_ICON_SVG = `<svg viewBox="0 0 24 24"><path d="M12 12c2.7 0 4.9-2.2 4.9-4.9S14.7 2.2 12 2.2 7.1 4.4 7.1 7.1 9.3 12 12 12zm0 2.6c-3.3 0-9.8 1.6-9.8 4.9v2.3h19.6v-2.3c0-3.3-6.5-4.9-9.8-4.9z"/></svg>`;
+
+function construirLogin() {
+  let html = '';
+  ['V-01','V-02','V-03'].forEach(code => {
+    html += `<button class="login-btn" onclick="entrarComo('${code}')">
+      <span class="profile-avatar">${PERSON_ICON_SVG}</span>
+      <span class="profile-name">${WORKERS[code]}</span>
+    </button>`;
+  });
+
+  // Reemplazos temporales activos hoy: aparecen como un perfil más, y desaparecen solos
+  // del login cuando termina su fecha/rango (porque getTemporalesActivosHoy ya no los incluye).
+  getTemporalesActivosHoy().forEach(temp => {
+    const cubreA = WORKERS[temp.sustituyeA] || temp.sustituyeA;
+    html += `<button class="login-btn temp" onclick="entrarComoTemporal('${temp.nombre.replace(/'/g,"\\'")}')">
+      <span class="profile-avatar">${PERSON_ICON_SVG}</span>
+      <span class="profile-name">${temp.nombre}</span>
+      <span class="profile-subnote">(cubre a ${cubreA})</span>
+    </button>`;
+  });
+
+  html += `<button class="login-btn all" onclick="entrarComo('ALL')">
+    <span class="profile-avatar">${PERSON_ICON_SVG}</span>
+    <span class="profile-name">Ver todos (admin)</span>
+  </button>`;
+  document.getElementById('login-options').innerHTML = html;
+}
+
+function entrarComo(worker) {
+  isAdmin = worker === 'ALL';
+  const btnId = worker === 'ALL' ? 'tab-all' : 'tab-' + worker.toLowerCase().replace('-', '');
+  selectWorker(worker, document.getElementById(btnId));
+  document.getElementById('login-screen').style.display = 'none';
+  document.getElementById('app-content').style.display = '';
+
+  if (worker === 'ALL') {
+    irAVistaMensual();
+  } else {
+    irAVistaDia();
+  }
+}
+
+function volverLogin() {
+  currentTemporal = null;
+  document.querySelector('#view-day .swipe-hint').style.display = '';
+  document.querySelector('#view-day .day-view-actions').style.display = '';
+  document.getElementById('app-content').style.display = 'none';
+  document.getElementById('login-screen').style.display = 'flex';
+  construirLogin(); // recalcula perfiles activos (un temporal puede haber dejado de estar vigente)
+}
+
+// Refresca la flecha de hora actual y el estado (Libre/Trabajando) cada 30s
+setInterval(() => {
+  if (currentTemporal) { renderDayViewTemporal(); return; }
+  if (viewMode === 'day') renderDayView();
+}, 30000);
+
+aplicarNombres();
+construirLogin();
+render();
+</script>
+
+<div id="admin-overlay" class="admin-overlay" style="display:none;" onclick="if(event.target===this) cerrarAdminPanel()">
+  <div class="admin-modal">
+    <div class="admin-modal-header">
+      <span class="admin-modal-title">⚙ Administración</span>
+      <button class="admin-modal-close" onclick="cerrarAdminPanel()">✕</button>
+    </div>
+
+    <div class="admin-section">
+      <div class="admin-section-title">Personal (cambiar nombres)</div>
+      <div class="admin-field">
+        <label>Vigilante V-01</label>
+        <input type="text" id="admin-name-v01" placeholder="Nombre">
+      </div>
+      <div class="admin-field">
+        <label>Vigilante V-02</label>
+        <input type="text" id="admin-name-v02" placeholder="Nombre">
+      </div>
+      <div class="admin-field">
+        <label>Vigilante V-03</label>
+        <input type="text" id="admin-name-v03" placeholder="Nombre">
+      </div>
+      <button class="admin-btn" onclick="guardarNombresAdmin()">Guardar nombres</button>
+      <div class="admin-msg" id="admin-names-msg"></div>
+    </div>
+
+    <div class="admin-section">
+      <div class="admin-section-title">Reemplazo de turno</div>
+
+      <div class="admin-field">
+        <label>¿A quién reemplaza?</label>
+        <select id="admin-rep-target" onchange="adminCalRender(); actualizarOpcionesReemplazante()">
+          <option value="v01">V-01</option>
+          <option value="v02">V-02</option>
+          <option value="v03">V-03</option>
+        </select>
+      </div>
+
+      <div class="admin-field">
+        <label>Motivo</label>
+        <select id="admin-rep-motivo" onchange="actualizarOtroMotivo()">
+          <option value="" selected disabled>Seleccione</option>
+          <option value="incapacidad">Incapacidad</option>
+          <option value="vacaciones">Vacaciones</option>
+          <option value="permiso">Permiso</option>
+          <option value="otro">Otro</option>
+        </select>
+      </div>
+
+      <div class="admin-field" id="admin-rep-otro-wrap" style="display:none;">
+        <label>Especifique el motivo</label>
+        <input type="text" id="admin-rep-otro" placeholder="Ej: Cita médica">
+      </div>
+
+      <div class="admin-radio-group">
+        <label><input type="radio" name="admin-rep-mode" value="existente" checked onchange="actualizarModoReemplazo()"> Vigilante existente</label>
+        <label><input type="radio" name="admin-rep-mode" value="temporal" onchange="actualizarModoReemplazo()"> Temporal (nuevo nombre)</label>
+      </div>
+
+      <div class="admin-field" id="admin-rep-existente-wrap">
+        <label>Reemplazante</label>
+        <select id="admin-rep-existente">
+          <option value="v01">V-01</option>
+          <option value="v02">V-02</option>
+          <option value="v03">V-03</option>
+        </select>
+      </div>
+      <div class="admin-field" id="admin-rep-temporal-wrap" style="display:none;">
+        <label>Nombre del reemplazante temporal</label>
+        <input type="text" id="admin-rep-temporal" placeholder="Ej: Carlos Pérez">
+      </div>
+
+      <div class="admin-radio-group">
+        <label><input type="radio" name="admin-rep-rango" value="dia" checked onchange="actualizarRangoReemplazo()"> Un día</label>
+        <label><input type="radio" name="admin-rep-rango" value="rango" onchange="actualizarRangoReemplazo()"> Rango de fechas</label>
+      </div>
+
+      <div class="admin-cal-nav">
+        <button type="button" onclick="adminCalCambiarMes(-1)">‹</button>
+        <span class="admin-cal-title" id="admin-cal-title"></span>
+        <button type="button" onclick="adminCalCambiarMes(1)">›</button>
+      </div>
+      <div class="admin-cal-grid" id="admin-cal-grid"></div>
+      <div class="admin-cal-selection-label" id="admin-cal-selection-label"></div>
+
+      <button class="admin-btn" onclick="guardarReemplazoAdmin()">Guardar reemplazo</button>
+      <div class="admin-msg" id="admin-rep-msg"></div>
+
+      <div class="admin-replacement-list" id="admin-replacement-list"></div>
+    </div>
+
+    <div class="admin-section">
+      <div class="admin-section-title">Adelanto de hora de entrada</div>
+      <div class="admin-field">
+        <label>Vigilante</label>
+        <select id="admin-adelanto-target" onchange="adelantoCalRender(); mostrarTurnoNormalAdelanto()">
+          <option value="v01">V-01</option>
+          <option value="v02">V-02</option>
+          <option value="v03">V-03</option>
+        </select>
+      </div>
+      <div class="admin-field">
+        <label>Fecha (lunes a viernes)</label>
+        <input type="hidden" id="admin-adelanto-fecha">
+        <div class="admin-cal-nav">
+          <button type="button" onclick="adelantoCalCambiarMes(-1)">‹</button>
+          <span class="admin-cal-title" id="adelanto-cal-title"></span>
+          <button type="button" onclick="adelantoCalCambiarMes(1)">›</button>
+        </div>
+        <div class="admin-cal-grid" id="adelanto-cal-grid"></div>
+        <div class="admin-cal-selection-label" id="adelanto-cal-selection-label"></div>
+      </div>
+      <div class="admin-replacement-info" id="admin-adelanto-turno-info" style="margin-bottom:10px;"></div>
+      <div class="admin-field">
+        <label>Hora a la que debe llegar</label>
+        <input type="time" id="admin-adelanto-hora">
+      </div>
+      <div class="admin-field">
+        <label>Motivo</label>
+        <input type="text" id="admin-adelanto-motivo" placeholder="Ej: la oficina cierra antes / sin energía">
+      </div>
+      <button class="admin-btn" onclick="guardarAdelantoAdmin()">Guardar adelanto</button>
+      <div class="admin-msg" id="admin-adelanto-msg"></div>
+
+      <div class="admin-replacement-list" id="admin-adelanto-list"></div>
+    </div>
+
+    <div class="admin-section">
+      <div class="admin-section-title">Días no laborables (lunes a viernes, sin festivo)</div>
+      <div class="admin-replacement-info" style="margin-bottom:10px;">
+        Marca un día hábil normal (que no sea ya festivo) para que se trate como festivo/fin de semana: ese día los 3 vigilantes rotan en 2 turnos y el horario de los días siguientes se reordena automáticamente.
+      </div>
+      <div class="admin-cal-nav">
+        <button type="button" onclick="bloqueoCalCambiarMes(-1)">‹</button>
+        <span class="admin-cal-title" id="bloqueo-cal-title"></span>
+        <button type="button" onclick="bloqueoCalCambiarMes(1)">›</button>
+      </div>
+      <div class="admin-cal-grid" id="bloqueo-cal-grid"></div>
+      <div class="admin-cal-selection-label" id="bloqueo-cal-selection-label">Toca un día hábil para marcarlo/desmarcarlo como no laborable.</div>
+      <div class="admin-field">
+        <label>Motivo (opcional)</label>
+        <input type="text" id="admin-bloqueo-motivo" placeholder="Ej: cierre administrativo">
+      </div>
+
+      <div class="admin-replacement-list" id="admin-bloqueo-list"></div>
+    </div>
+  </div>
+</div>
+
+<script>
+// ─── PANEL DE ADMINISTRACIÓN ────────────────────────────────────────────────
+function abrirAdminPanel() {
+  document.getElementById('admin-name-v01').value = WORKERS['V-01'];
+  document.getElementById('admin-name-v02').value = WORKERS['V-02'];
+  document.getElementById('admin-name-v03').value = WORKERS['V-03'];
+  document.getElementById('admin-names-msg').textContent = '';
+  document.getElementById('admin-rep-msg').textContent = '';
+  document.getElementById('admin-rep-motivo').value = '';
+  actualizarOtroMotivo();
+  actualizarModoReemplazo();
+  actualizarOpcionesReemplazante();
+  adminCalMonth = TODAY.getMonth();
+  adminCalYear = TODAY.getFullYear();
+  adminCalSelStart = null;
+  adminCalSelEnd = null;
+  adminCalRender();
+  renderListaReemplazos();
+  document.getElementById('admin-adelanto-msg').textContent = '';
+  document.getElementById('admin-adelanto-fecha').value = '';
+  document.getElementById('admin-adelanto-hora').value = '';
+  document.getElementById('admin-adelanto-motivo').value = '';
+  adelantoCalMonth = TODAY.getMonth();
+  adelantoCalYear = TODAY.getFullYear();
+  adelantoCalSel = null;
+  adelantoCalRender();
+  mostrarTurnoNormalAdelanto();
+  bloqueoCalMonth = TODAY.getMonth();
+  bloqueoCalYear = TODAY.getFullYear();
+  bloqueoCalRender();
+  document.getElementById('admin-bloqueo-motivo').value = '';
+  renderListaBloqueos();
+  renderListaAjustes();
+  document.getElementById('admin-overlay').style.display = 'flex';
+}
+
+function cerrarAdminPanel() {
+  document.getElementById('admin-overlay').style.display = 'none';
+}
+
+function guardarNombresAdmin() {
+  const v01 = document.getElementById('admin-name-v01').value.trim();
+  const v02 = document.getElementById('admin-name-v02').value.trim();
+  const v03 = document.getElementById('admin-name-v03').value.trim();
+  const msg = document.getElementById('admin-names-msg');
+
+  if (!v01 || !v02 || !v03) {
+    msg.textContent = 'Todos los nombres son obligatorios.';
+    msg.className = 'admin-msg err';
+    return;
+  }
+
+  WORKERS['V-01'] = v01;
+  WORKERS['V-02'] = v02;
+  WORKERS['V-03'] = v03;
+  guardarWorkers();
+  aplicarNombres();
+  construirLogin();
+
+  msg.textContent = 'Nombres guardados correctamente.';
+  msg.className = 'admin-msg ok';
+}
+
+function actualizarModoReemplazo() {
+  const modo = document.querySelector('input[name="admin-rep-mode"]:checked').value;
+  document.getElementById('admin-rep-existente-wrap').style.display = modo === 'existente' ? '' : 'none';
+  document.getElementById('admin-rep-temporal-wrap').style.display = modo === 'temporal' ? '' : 'none';
+}
+
+// Muestra el campo de texto libre cuando el motivo seleccionado es "Otro"
+function actualizarOtroMotivo() {
+  const motivo = document.getElementById('admin-rep-motivo').value;
+  document.getElementById('admin-rep-otro-wrap').style.display = motivo === 'otro' ? '' : 'none';
+}
+
+// Quita al vigilante reemplazado de la lista de posibles reemplazantes existentes
+function actualizarOpcionesReemplazante() {
+  const target = document.getElementById('admin-rep-target').value;
+  const sel = document.getElementById('admin-rep-existente');
+  Array.from(sel.options).forEach(opt => {
+    opt.disabled = (opt.value === target);
+  });
+  if (sel.value === target) {
+    const disponible = Array.from(sel.options).find(opt => !opt.disabled);
+    if (disponible) sel.value = disponible.value;
+  }
+}
+
+// ─── MINI-CALENDARIO SELECCIONABLE (elige fecha o rango del reemplazo) ─────
+let adminCalMonth = TODAY.getMonth();
+let adminCalYear = TODAY.getFullYear();
+let adminCalSelStart = null; // 'YYYY-MM-DD'
+let adminCalSelEnd = null;   // 'YYYY-MM-DD'
+
+function actualizarRangoReemplazo() {
+  // Al cambiar entre "Un día" y "Rango", reinicia la selección para evitar confusión
+  adminCalSelStart = null;
+  adminCalSelEnd = null;
+  adminCalRender();
+}
+
+function adminCalCambiarMes(delta) {
+  adminCalMonth += delta;
+  if (adminCalMonth < 0) { adminCalMonth = 11; adminCalYear--; }
+  if (adminCalMonth > 11) { adminCalMonth = 0; adminCalYear++; }
+  adminCalRender();
+}
+
+function adminCalRender() {
+  const wkey = document.getElementById('admin-rep-target').value; // v01/v02/v03
+  document.getElementById('admin-cal-title').textContent = MESES[adminCalMonth] + ' ' + adminCalYear;
+
+  const firstDay = new Date(adminCalYear, adminCalMonth, 1);
+  const lastDay = new Date(adminCalYear, adminCalMonth + 1, 0);
+  const startDow = firstDay.getDay();
+
+  let html = '';
+  DIAS_CORTO.forEach(dn => { html += `<div class="admin-cal-dow">${dn[0]}</div>`; });
+
+  for (let i = 0; i < startDow; i++) html += `<div class="admin-cal-day empty"></div>`;
+
+  const esMesInicial = (adminCalYear === START_YEAR && adminCalMonth === START_MONTH);
+
+  for (let d = 1; d <= lastDay.getDate(); d++) {
+    const disabledPorInicio = esMesInicial && d < START_DAY;
+    const date = new Date(adminCalYear, adminCalMonth, d);
+    const key = fmtKey(date);
+    const t = getTurnos(date);
+    const shift = t[wkey];
+
+    let cls = 'shift-free', label = 'L';
+    if (shift === 'T-01') { cls = 'shift-night'; label = 'T-01'; }
+    else if (shift === 'T-02') { cls = 'shift-day'; label = 'T-02'; }
+    else if (shift === 'VAC') { cls = 'shift-free'; label = 'VAC'; }
+
+    let extraCls = '';
+    if (date.toDateString() === TODAY.toDateString()) extraCls += ' today';
+    if (adminCalSelStart && key === adminCalSelStart) extraCls += ' selected';
+    if (adminCalSelEnd && key === adminCalSelEnd) extraCls += ' selected';
+    if (adminCalSelStart && adminCalSelEnd && key > adminCalSelStart && key < adminCalSelEnd) extraCls += ' in-range';
+
+    if (disabledPorInicio) {
+      html += `<div class="admin-cal-day disabled"><span>${d}</span></div>`;
+    } else {
+      html += `<div class="admin-cal-day ${cls}${extraCls}" onclick="adminCalClickDia('${key}')">
+        <span>${d}</span><span class="acd-shift">${label}</span>
+      </div>`;
+    }
+  }
+
+  document.getElementById('admin-cal-grid').innerHTML = html;
+  adminCalActualizarLabel();
+}
+
+function adminCalClickDia(key) {
+  const rango = document.querySelector('input[name="admin-rep-rango"]:checked').value;
+
+  if (rango === 'dia') {
+    adminCalSelStart = key;
+    adminCalSelEnd = key;
+  } else {
+    // Rango: primer clic = inicio, segundo clic = fin (se reordena si el fin queda antes)
+    if (!adminCalSelStart || (adminCalSelStart && adminCalSelEnd)) {
+      adminCalSelStart = key;
+      adminCalSelEnd = null;
+    } else {
+      if (key < adminCalSelStart) {
+        adminCalSelEnd = adminCalSelStart;
+        adminCalSelStart = key;
+      } else {
+        adminCalSelEnd = key;
+      }
+    }
+  }
+  adminCalRender();
+}
+
+function adminCalActualizarLabel() {
+  const label = document.getElementById('admin-cal-selection-label');
+  const fmt = k => new Date(k + 'T00:00:00').toLocaleDateString('es', { day:'2-digit', month:'short', year:'numeric' });
+
+  if (!adminCalSelStart) {
+    label.innerHTML = 'Toca un día en el calendario para elegir la fecha.';
+  } else if (!adminCalSelEnd) {
+    label.innerHTML = `Inicio: <strong>${fmt(adminCalSelStart)}</strong> — toca el día final.`;
+  } else if (adminCalSelStart === adminCalSelEnd) {
+    label.innerHTML = `Fecha elegida: <strong>${fmt(adminCalSelStart)}</strong>`;
+  } else {
+    label.innerHTML = `Rango: <strong>${fmt(adminCalSelStart)}</strong> a <strong>${fmt(adminCalSelEnd)}</strong>`;
+  }
+}
+
+// ─── MINI-CALENDARIO SELECCIONABLE (elige fecha del adelanto de hora) ─────
+let adelantoCalMonth = TODAY.getMonth();
+let adelantoCalYear = TODAY.getFullYear();
+let adelantoCalSel = null; // 'YYYY-MM-DD'
+
+function adelantoCalCambiarMes(delta) {
+  adelantoCalMonth += delta;
+  if (adelantoCalMonth < 0) { adelantoCalMonth = 11; adelantoCalYear--; }
+  if (adelantoCalMonth > 11) { adelantoCalMonth = 0; adelantoCalYear++; }
+  adelantoCalRender();
+}
+
+function adelantoCalRender() {
+  const wkey = document.getElementById('admin-adelanto-target').value; // v01/v02/v03
+  document.getElementById('adelanto-cal-title').textContent = MESES[adelantoCalMonth] + ' ' + adelantoCalYear;
+
+  const firstDay = new Date(adelantoCalYear, adelantoCalMonth, 1);
+  const lastDay = new Date(adelantoCalYear, adelantoCalMonth + 1, 0);
+  const startDow = firstDay.getDay();
+
+  let html = '';
+  DIAS_CORTO.forEach(dn => { html += `<div class="admin-cal-dow">${dn[0]}</div>`; });
+
+  for (let i = 0; i < startDow; i++) html += `<div class="admin-cal-day empty"></div>`;
+
+  const esMesInicial = (adelantoCalYear === START_YEAR && adelantoCalMonth === START_MONTH);
+
+  for (let d = 1; d <= lastDay.getDate(); d++) {
+    const disabledPorInicio = esMesInicial && d < START_DAY;
+    const date = new Date(adelantoCalYear, adelantoCalMonth, d);
+    const key = fmtKey(date);
+    const t = getTurnos(date);
+    const shift = t[wkey];
+
+    let cls = 'shift-free', label = 'L';
+    if (shift === 'T-01') { cls = 'shift-night'; label = 'T-01'; }
+    else if (shift === 'T-02') { cls = 'shift-day'; label = 'T-02'; }
+    else if (shift === 'VAC') { cls = 'shift-free'; label = 'VAC'; }
+
+    let extraCls = '';
+    if (date.toDateString() === TODAY.toDateString()) extraCls += ' today';
+    if (adelantoCalSel && key === adelantoCalSel) extraCls += ' selected';
+
+    if (disabledPorInicio || date < minFecha()) {
+      html += `<div class="admin-cal-day disabled"><span>${d}</span></div>`;
+    } else {
+      html += `<div class="admin-cal-day ${cls}${extraCls}" onclick="adelantoCalClickDia('${key}')">
+        <span>${d}</span><span class="acd-shift">${label}</span>
+      </div>`;
+    }
+  }
+
+  document.getElementById('adelanto-cal-grid').innerHTML = html;
+  adelantoCalActualizarLabel();
+}
+
+function adelantoCalClickDia(key) {
+  adelantoCalSel = key;
+  document.getElementById('admin-adelanto-fecha').value = key;
+  adelantoCalRender();
+  mostrarTurnoNormalAdelanto();
+}
+
+function adelantoCalActualizarLabel() {
+  const label = document.getElementById('adelanto-cal-selection-label');
+  const fmt = k => new Date(k + 'T00:00:00').toLocaleDateString('es', { day:'2-digit', month:'short', year:'numeric' });
+  label.innerHTML = adelantoCalSel
+    ? `Fecha elegida: <strong>${fmt(adelantoCalSel)}</strong>`
+    : 'Toca un día en el calendario para elegir la fecha.';
+}
+
+// ─── MINI-CALENDARIO PARA MARCAR DÍAS NO LABORABLES (admin) ────────────────
+let bloqueoCalMonth = TODAY.getMonth();
+let bloqueoCalYear = TODAY.getFullYear();
+
+function bloqueoCalCambiarMes(delta) {
+  bloqueoCalMonth += delta;
+  if (bloqueoCalMonth < 0) { bloqueoCalMonth = 11; bloqueoCalYear--; }
+  if (bloqueoCalMonth > 11) { bloqueoCalMonth = 0; bloqueoCalYear++; }
+  bloqueoCalRender();
+}
+
+function bloqueoCalRender() {
+  document.getElementById('bloqueo-cal-title').textContent = MESES[bloqueoCalMonth] + ' ' + bloqueoCalYear;
+
+  const firstDay = new Date(bloqueoCalYear, bloqueoCalMonth, 1);
+  const lastDay = new Date(bloqueoCalYear, bloqueoCalMonth + 1, 0);
+  const startDow = firstDay.getDay();
+
+  let html = '';
+  DIAS_CORTO.forEach(dn => { html += `<div class="admin-cal-dow">${dn[0]}</div>`; });
+
+  for (let i = 0; i < startDow; i++) html += `<div class="admin-cal-day empty"></div>`;
+
+  const esMesInicial = (bloqueoCalYear === START_YEAR && bloqueoCalMonth === START_MONTH);
+
+  for (let d = 1; d <= lastDay.getDate(); d++) {
+    const disabledPorInicio = esMesInicial && d < START_DAY;
+    const date = new Date(bloqueoCalYear, bloqueoCalMonth, d);
+    const key = fmtKey(date);
+    const marcado = !!NO_LABORABLES[key];
+    // Solo se puede marcar/desmarcar un día hábil que no sea ya festivo oficial.
+    // Si ya está marcado, siempre se puede desmarcar (aunque sea fin de semana por error previo).
+    const puedeMarcar = isWeekday(date) && !isFestivoOficial(date);
+
+    let cls = 'shift-free', label = '';
+    if (marcado) { cls = 'manual-libre'; label = 'NO LAB.'; }
+    else if (isFestivoOficial(date)) { cls = 'shift-free'; label = 'FEST.'; }
+    else if (isWeekend(date)) { cls = 'shift-free'; label = ''; }
+
+    let extraCls = '';
+    if (date.toDateString() === TODAY.toDateString()) extraCls += ' today';
+
+    if (disabledPorInicio || date < minFecha() || (!puedeMarcar && !marcado)) {
+      html += `<div class="admin-cal-day disabled ${cls}"><span>${d}</span>${label ? `<span class="acd-shift">${label}</span>` : ''}</div>`;
+    } else {
+      html += `<div class="admin-cal-day ${cls}${extraCls}" onclick="bloqueoCalToggleDia('${key}')">
+        <span>${d}</span>${label ? `<span class="acd-shift">${label}</span>` : ''}
+      </div>`;
+    }
+  }
+
+  document.getElementById('bloqueo-cal-grid').innerHTML = html;
+}
+
+function bloqueoCalToggleDia(key) {
+  if (NO_LABORABLES[key]) {
+    delete NO_LABORABLES[key];
+  } else {
+    const motivo = document.getElementById('admin-bloqueo-motivo').value.trim();
+    NO_LABORABLES[key] = motivo || 'No laborable';
+  }
+  guardarNoLaborables();
+  refrescarTrasCambioFestivos();
+}
+
+// Refresca todo lo que depende de isHoliday() cuando se marca/desmarca un día:
+// el horario principal, ambos mini-calendarios admin y la lista de días bloqueados.
+function refrescarTrasCambioFestivos() {
+  render();
+  if (viewMode === 'day') renderDayView();
+  adminCalRender();
+  adelantoCalRender();
+  mostrarTurnoNormalAdelanto();
+  bloqueoCalRender();
+  renderListaBloqueos();
+}
+
+function renderListaBloqueos() {
+  const cont = document.getElementById('admin-bloqueo-list');
+  const keys = Object.keys(NO_LABORABLES).sort();
+
+  if (keys.length === 0) {
+    cont.innerHTML = '<div class="admin-empty-note">No hay días no laborables marcados.</div>';
+    return;
+  }
+
+  cont.innerHTML = keys.map(key => {
+    const motivo = NO_LABORABLES[key];
+    const fechaFmt = new Date(key + 'T00:00:00').toLocaleDateString('es', { day:'2-digit', month:'short', year:'numeric' });
+    return `<div class="admin-replacement-item">
+      <div class="admin-replacement-info">${fechaFmt}<br><strong>${motivo}</strong></div>
+      <button class="admin-replacement-del" onclick="eliminarBloqueoAdmin('${key}')">Quitar</button>
+    </div>`;
+  }).join('');
+}
+
+function eliminarBloqueoAdmin(key) {
+  delete NO_LABORABLES[key];
+  guardarNoLaborables();
+  refrescarTrasCambioFestivos();
+}
+
+function guardarReemplazoAdmin() {
+  const target = document.getElementById('admin-rep-target').value; // v01/v02/v03
+  let motivo = document.getElementById('admin-rep-motivo').value;
+  const modo = document.querySelector('input[name="admin-rep-mode"]:checked').value;
+  const fechaIni = adminCalSelStart;
+  const fechaFin = adminCalSelEnd || adminCalSelStart;
+  const msg = document.getElementById('admin-rep-msg');
+
+  if (!motivo) {
+    msg.textContent = 'Selecciona el motivo del reemplazo.';
+    msg.className = 'admin-msg err';
+    return;
+  }
+  if (motivo === 'otro') {
+    const otroTxt = document.getElementById('admin-rep-otro').value.trim();
+    if (!otroTxt) {
+      msg.textContent = 'Especifica el motivo en el campo de texto.';
+      msg.className = 'admin-msg err';
+      return;
+    }
+    motivo = otroTxt;
+  }
+
+  let nombreReemplazo;
+  if (modo === 'existente') {
+    const code = document.getElementById('admin-rep-existente').value;
+    if (code === target) {
+      msg.textContent = 'El reemplazante no puede ser la misma persona.';
+      msg.className = 'admin-msg err';
+      return;
+    }
+    nombreReemplazo = WORKERS[CODE_TO_TAB[code]];
+  } else {
+    nombreReemplazo = document.getElementById('admin-rep-temporal').value.trim();
+    if (!nombreReemplazo) {
+      msg.textContent = 'Ingresa el nombre del reemplazante temporal.';
+      msg.className = 'admin-msg err';
+      return;
+    }
+  }
+
+  if (!fechaIni || !fechaFin) {
+    msg.textContent = 'Selecciona la fecha (o el rango) en el calendario.';
+    msg.className = 'admin-msg err';
+    return;
+  }
+
+  agregarExcepcionRango(fechaIni, fechaFin, target, nombreReemplazo, motivo);
+  render();
+  if (viewMode === 'day') renderDayView();
+  construirLogin(); // si el reemplazo cubre HOY, el temporal debe aparecer ya en el login
+
+  msg.textContent = 'Reemplazo guardado correctamente.';
+  msg.className = 'admin-msg ok';
+  adminCalSelStart = null;
+  adminCalSelEnd = null;
+  adminCalRender();
+  renderListaReemplazos();
+}
+
+// Lista las excepciones activas (reemplazos) agrupadas, con opción de eliminar por fecha
+function renderListaReemplazos() {
+  const cont = document.getElementById('admin-replacement-list');
+  const keys = Object.keys(EXCEPCIONES).sort();
+
+  if (keys.length === 0) {
+    cont.innerHTML = '<div class="admin-empty-note">No hay reemplazos registrados.</div>';
+    return;
+  }
+
+  cont.innerHTML = keys.map(key => {
+    const exc = EXCEPCIONES[key];
+    const fechaFmt = new Date(key + 'T00:00:00').toLocaleDateString('es', { day:'2-digit', month:'short', year:'numeric' });
+    const reemplazado = WORKERS[exc.sustituyeA] || exc.sustituyeA;
+    const motivoTxt = getMotivoInfo(exc.motivo).label;
+    return `<div class="admin-replacement-item">
+      <div class="admin-replacement-info">${fechaFmt} · ${motivoTxt}<br><strong>${exc.sustituto}</strong> cubre a ${reemplazado}</div>
+      <button class="admin-replacement-del" onclick="eliminarReemplazoAdmin('${key}')">Quitar</button>
+    </div>`;
+  }).join('');
+}
+
+function eliminarReemplazoAdmin(key) {
+  quitarExcepcion(key);
+  render();
+  if (viewMode === 'day') renderDayView();
+  construirLogin(); // si se quita un reemplazo de hoy, el temporal debe desaparecer del login
+  renderListaReemplazos();
+}
+
+// ─── ADELANTO DE HORA DE ENTRADA (panel admin) ─────────────────────────────
+// Muestra en el formulario el turno normal del vigilante para la fecha elegida,
+// para que el admin sepa a qué hora entra normalmente antes de fijar el adelanto.
+function mostrarTurnoNormalAdelanto() {
+  const target = document.getElementById('admin-adelanto-target').value;
+  const fechaStr = document.getElementById('admin-adelanto-fecha').value;
+  const info = document.getElementById('admin-adelanto-turno-info');
+
+  if (!fechaStr) { info.innerHTML = ''; return; }
+
+  const fecha = new Date(fechaStr + 'T00:00:00');
+  const nombre = WORKERS[CODE_TO_TAB[target]] || target;
+
+  if (!isWeekday(fecha)) {
+    info.innerHTML = `<strong>${nombre}</strong>: esa fecha no es de lunes a viernes.`;
+    return;
+  }
+  if (fecha < minFecha()) {
+    info.innerHTML = `<strong>${nombre}</strong>: fecha anterior al inicio del cronograma.`;
+    return;
+  }
+
+  const shift = getTurnos(fecha)[target];
+  if (shift === 'T-01') {
+    info.innerHTML = `<strong>${nombre}</strong> tiene turno normal: <strong>T-01 · Noche</strong> (5:00 PM → 7:30 AM)`;
+  } else if (shift === 'T-02') {
+    info.innerHTML = `<strong>${nombre}</strong> tiene turno normal: <strong>T-02 · Día</strong> (7:30 AM → 5:00 PM)`;
+  } else {
+    info.innerHTML = `<strong>${nombre}</strong> no tiene turno asignado ese día.`;
+  }
+}
+
+function guardarAdelantoAdmin() {
+  const target = document.getElementById('admin-adelanto-target').value; // v01/v02/v03
+  const fechaStr = document.getElementById('admin-adelanto-fecha').value; // YYYY-MM-DD
+  const hora = document.getElementById('admin-adelanto-hora').value; // HH:MM
+  const motivo = document.getElementById('admin-adelanto-motivo').value.trim();
+  const msg = document.getElementById('admin-adelanto-msg');
+
+  if (!fechaStr) {
+    msg.textContent = 'Selecciona la fecha.';
+    msg.className = 'admin-msg err';
+    return;
+  }
+  const fecha = new Date(fechaStr + 'T00:00:00');
+  if (!isWeekday(fecha)) {
+    msg.textContent = 'Solo se puede registrar un adelanto de lunes a viernes.';
+    msg.className = 'admin-msg err';
+    return;
+  }
+  if (fecha < minFecha()) {
+    msg.textContent = 'La fecha debe ser igual o posterior al inicio del cronograma.';
+    msg.className = 'admin-msg err';
+    return;
+  }
+  if (!hora) {
+    msg.textContent = 'Indica la hora a la que debe llegar.';
+    msg.className = 'admin-msg err';
+    return;
+  }
+  if (!motivo) {
+    msg.textContent = 'Indica el motivo del adelanto.';
+    msg.className = 'admin-msg err';
+    return;
+  }
+
+  const turnoDelDia = getTurnos(fecha)[target];
+  if (turnoDelDia !== 'T-01' && turnoDelDia !== 'T-02') {
+    msg.textContent = `${WORKERS[CODE_TO_TAB[target]]} no tiene turno asignado ese día.`;
+    msg.className = 'admin-msg err';
+    return;
+  }
+
+  agregarAjusteHora(fechaStr, target, hora, motivo);
+  render();
+  if (viewMode === 'day') renderDayView();
+
+  msg.textContent = 'Adelanto de hora guardado correctamente.';
+  msg.className = 'admin-msg ok';
+  document.getElementById('admin-adelanto-fecha').value = '';
+  document.getElementById('admin-adelanto-hora').value = '';
+  document.getElementById('admin-adelanto-motivo').value = '';
+  adelantoCalSel = null;
+  adelantoCalRender();
+  mostrarTurnoNormalAdelanto();
+  renderListaAjustes();
+}
+
+// Lista los adelantos de hora registrados, con opción de eliminar
+function renderListaAjustes() {
+  const cont = document.getElementById('admin-adelanto-list');
+  const keys = Object.keys(AJUSTES).sort();
+
+  if (keys.length === 0) {
+    cont.innerHTML = '<div class="admin-empty-note">No hay adelantos de hora registrados.</div>';
+    return;
+  }
+
+  cont.innerHTML = keys.map(key => {
+    const aj = AJUSTES[key];
+    const fechaFmt = new Date(aj.fecha + 'T00:00:00').toLocaleDateString('es', { day:'2-digit', month:'short', year:'numeric' });
+    const nombre = WORKERS[CODE_TO_TAB[aj.workerCode]] || aj.workerCode;
+    return `<div class="admin-replacement-item">
+      <div class="admin-replacement-info">${fechaFmt} · Llega ${aj.hora}<br><strong>${nombre}</strong> · ${aj.motivo}</div>
+      <button class="admin-replacement-del" onclick="eliminarAjusteAdmin('${key}')">Quitar</button>
+    </div>`;
+  }).join('');
+}
+
+function eliminarAjusteAdmin(key) {
+  quitarAjusteHora(key);
+  render();
+  if (viewMode === 'day') renderDayView();
+  renderListaAjustes();
+}
+</script>
+
+</body>
+</html>
