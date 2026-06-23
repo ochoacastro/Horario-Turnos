@@ -1438,55 +1438,112 @@ function progresoTurnoHTML(date, wkey) {
   </div>`;
 }
 
-// Devuelve estado calculado con precision de segundos
+// Devuelve estado calculado con precision de segundos.
+// Cuando el vigilante esta libre busca el proximo turno en dias futuros
+// para soportar descansos largos (ej: Victor libre varios dias habiles seguidos).
 function calcEstadoActual(date, wkey) {
   const ahora = new Date();
   const segAhora = ahora.getHours() * 3600 + ahora.getMinutes() * 60 + ahora.getSeconds();
   const minAhora = Math.floor(segAhora / 60);
+
+  // --- Turno de ayer: puede seguir activo entre 00:00-07:30 ---
   const prevDate = new Date(date);
   prevDate.setDate(prevDate.getDate() - 1);
   const prevShift = getTurnos(prevDate)[wkey];
   const todayShift = getTurnos(date)[wkey];
 
-  let boundary1 = 450, boundary2 = 1020;
-  if (todayShift === 'T-02') boundary1 = inicioRealTurno(date, wkey, 'T-02');
-  if (todayShift === 'T-01') boundary2 = inicioRealTurno(date, wkey, 'T-01');
+  // Limites reales de inicio del turno de hoy
+  const b1 = todayShift === 'T-02' ? inicioRealTurno(date, wkey, 'T-02') : 450;  // inicio T-02
+  const b2 = todayShift === 'T-01' ? inicioRealTurno(date, wkey, 'T-01') : 1020; // inicio T-01
 
-  let trabajando, finSeg, finLabel;
-  if (minAhora < boundary1) {
-    trabajando = prevShift === 'T-01';
-    finSeg = boundary1 * 60; finLabel = minToLabel(boundary1);
-  } else if (minAhora < boundary2) {
-    trabajando = todayShift === 'T-02';
-    finSeg = boundary2 * 60; finLabel = minToLabel(boundary2);
-  } else {
-    trabajando = todayShift === 'T-01';
-    // T-01 termina a las 7:30 AM del dia siguiente
-    finSeg = (1440 + 450) * 60; finLabel = minToLabel(450);
+  // --- Tramo 1: 00:00 - 07:30 (fin del turno de noche de AYER) ---
+  if (minAhora < 450) {
+    if (prevShift === 'T-01') {
+      // Aun trabajando: el turno de anoche termina a las 7:30 AM (450 min)
+      return { trabajando: true, finSeg: 450 * 60, finLabel: minToLabel(450), segAhora, diasExtra: 0 };
+    }
+    // Libre: siguiente evento es el turno de HOY (si lo hay) o buscamos en dias futuros
+    if (todayShift === 'T-02') {
+      return { trabajando: false, finSeg: b1 * 60, finLabel: minToLabel(b1), segAhora, diasExtra: 0 };
+    }
+    if (todayShift === 'T-01') {
+      return { trabajando: false, finSeg: b2 * 60, finLabel: minToLabel(b2), segAhora, diasExtra: 0 };
+    }
+    // No hay turno hoy: buscar proximo turno en dias futuros
+    return buscarProximoTurno(date, wkey, segAhora);
   }
-  return { trabajando, finSeg, finLabel, segAhora };
+
+  // --- Tramo 2: 07:30 - 17:00 ---
+  if (minAhora < 1020) {
+    if (todayShift === 'T-02' && minAhora >= b1) {
+      // Trabajando en turno de dia: termina a las 17:00
+      return { trabajando: true, finSeg: 1020 * 60, finLabel: minToLabel(1020), segAhora, diasExtra: 0 };
+    }
+    // Libre en este tramo
+    if (todayShift === 'T-01') {
+      // El turno de esta noche empieza a las 17:00 (b2)
+      return { trabajando: false, finSeg: b2 * 60, finLabel: minToLabel(b2), segAhora, diasExtra: 0 };
+    }
+    if (todayShift === 'T-02' && minAhora < b1) {
+      // T-02 aun no empieza (adelanto de hora no alcanzado)
+      return { trabajando: false, finSeg: b1 * 60, finLabel: minToLabel(b1), segAhora, diasExtra: 0 };
+    }
+    // Sin turno hoy: buscar siguiente
+    return buscarProximoTurno(date, wkey, segAhora);
+  }
+
+  // --- Tramo 3: 17:00 - 24:00 ---
+  if (todayShift === 'T-01') {
+    // Trabajando en turno de noche: termina a las 7:30 AM del dia siguiente
+    return { trabajando: true, finSeg: (1440 + 450) * 60, finLabel: minToLabel(450), segAhora, diasExtra: 0 };
+  }
+  // Libre: buscar siguiente turno en dias futuros
+  return buscarProximoTurno(date, wkey, segAhora);
 }
 
-// Formatea segundos como h:mm:ss o m:ss
+// Busca el proximo turno asignado en los siguientes dias (max 14 dias vista).
+// Devuelve finSeg relativo al inicio del dia actual (puede superar 86400).
+function buscarProximoTurno(date, wkey, segAhora) {
+  for (let d = 1; d <= 14; d++) {
+    const next = new Date(date);
+    next.setDate(next.getDate() + d);
+    const shift = getTurnos(next)[wkey];
+    if (shift === 'T-01' || shift === 'T-02') {
+      const inicioMin = shift === 'T-01' ? inicioRealTurno(next, wkey, 'T-01') : inicioRealTurno(next, wkey, 'T-02');
+      // segundos hasta ese turno = dias completos restantes * 86400 + minutos de inicio del turno en ese dia - ya transcurridos hoy
+      const segHastaInicio = d * 86400 + inicioMin * 60 - segAhora;
+      const horaLabel = minToLabel(inicioMin);
+      return { trabajando: false, finSeg: segAhora + segHastaInicio, finLabel: horaLabel, segAhora, diasExtra: d };
+    }
+  }
+  // Sin turno en 14 dias (raro)
+  return { trabajando: false, finSeg: segAhora + 86400, finLabel: '--:--', segAhora, diasExtra: 1 };
+}
+
+// Formatea segundos como "Xd Yh Zm Ws" si hay dias, "Yh Zm Ws" si hay horas, o "Zm Ws"
 function fmtCountdown(seg) {
   seg = Math.max(0, seg);
+  const d = Math.floor(seg / 86400);
+  const h = Math.floor((seg % 86400) / 3600);
+  const m = Math.floor((seg % 3600) / 60);
   const s = seg % 60;
-  const m = Math.floor(seg / 60) % 60;
-  const h = Math.floor(seg / 3600);
+  const hh = String(h).padStart(2, '0');
   const mm = String(m).padStart(2, '0');
   const ss = String(s).padStart(2, '0');
-  return h > 0 ? `${h}:${mm}:${ss}` : `${m}:${ss}`;
+  if (d > 0) return `${d}d ${hh}:${mm}:${ss}`;
+  if (h > 0) return `${h}:${mm}:${ss}`;
+  return `${m}:${ss}`;
 }
 
 // Texto de estado en vivo: solo cuando se ve el dia de HOY
 function estadoActualTexto(date, wkey) {
   if (date.toDateString() !== TODAY.toDateString()) return '';
-  const { trabajando, finSeg, finLabel, segAhora } = calcEstadoActual(date, wkey);
-  const cd = fmtCountdown(finSeg - segAhora);
-  if (trabajando) {
-    return `<div class="day-status-pill working" id="cd-pill" data-fin="${finSeg}" data-mode="working">🔴 Trabajando · libre en <span id="cd-time">${cd}</span> (${finLabel})</div>`;
+  const est = calcEstadoActual(date, wkey);
+  const cd = fmtCountdown(est.finSeg - est.segAhora);
+  if (est.trabajando) {
+    return `<div class="day-status-pill working" id="cd-pill" data-fin="${est.finSeg}" data-mode="working">🔴 Trabajando · libre en <span id="cd-time">${cd}</span> (${est.finLabel})</div>`;
   }
-  return `<div class="day-status-pill free" id="cd-pill" data-fin="${finSeg}" data-mode="free">🟢 Libre · turno en <span id="cd-time">${cd}</span> (${finLabel})</div>`;
+  return `<div class="day-status-pill free" id="cd-pill" data-fin="${est.finSeg}" data-mode="free">🟢 Libre · turno en <span id="cd-time">${cd}</span> (${est.finLabel})</div>`;
 }
 function renderDayView() {
   const wkey = selectedWorker === 'V-01' ? 'v01' : selectedWorker === 'V-02' ? 'v02' : 'v03';
@@ -1701,9 +1758,9 @@ setInterval(() => {
   const pill = document.getElementById('cd-pill');
   if (pill) {
     const wkey = selectedWorker === 'V-01' ? 'v01' : selectedWorker === 'V-02' ? 'v02' : 'v03';
-    const { finSeg, segAhora } = calcEstadoActual(currentDayDate, wkey);
+    const est = calcEstadoActual(currentDayDate, wkey);
     const span = document.getElementById('cd-time');
-    if (span) span.textContent = fmtCountdown(finSeg - segAhora);
+    if (span) span.textContent = fmtCountdown(est.finSeg - est.segAhora);
   }
 }, 1000);
 
